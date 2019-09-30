@@ -4,6 +4,8 @@ var camera, scene, renderer;
 
 var geometry, material, mesh;
 
+var objects = [];
+
 function addTargetSupport(obj, x, y, z) {
     'use strict';
     
@@ -35,6 +37,8 @@ function createTarget(x, y, z) {
     addTargetTorus(target, 0, 30, 0);
     
     scene.add(target);
+
+    objects.push(target);
     
     target.position.x = x;
     target.position.y = y;
@@ -86,6 +90,8 @@ function createTable(x, y, z) {
     addSphericalCap(table, 0, 0, 0);
     
     scene.add(table);
+
+    objects.push(table);
     
     table.position.x = x;
     table.position.y = y;
@@ -94,11 +100,14 @@ function createTable(x, y, z) {
 
 function createCamera() {
     'use strict';
-    camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
-    
+    // camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
+    camera = new THREE.OrthographicCamera(
+        window.innerWidth / -20, window.innerWidth / 20, window.innerHeight / 20,
+        window.innerHeight / -20, 0.1, 1000);
+
     camera.position.x = 0;
-    camera.position.y = 30;
-    camera.position.z = 50;
+    camera.position.y = -1;
+    camera.position.z = 0;
     camera.lookAt(scene.position);
 }
 
@@ -110,7 +119,7 @@ function createScene() {
     scene.add(new THREE.AxisHelper(10));
     
     createTable(0, 0, 0);
-    createTarget(50, 0, 0);
+    createTarget(40, 0, 0);
 }
 
 function render() {
@@ -129,20 +138,41 @@ function onResize() {
     }
 }
 
+function toggleWireframe(obj) {
+    obj.children[0].material.wireframe = !obj.children[0].material.wireframe;
+}
+
 function onKeyDown(e) {
     'use strict';
 
     switch(e.keyCode) {
-        case 65: //A
-        case 97: //a
-            scene.traverse(function (node) {
-                if (node instanceof THREE.Mesh) {
-                    node.material.wireframe = !node.material.wireframe;
-                }
-            });
+        case 49:  // 1
+            camera.position.x = 0;
+            camera.position.y = -1;
+            camera.position.z = 0;
+            camera.lookAt(scene.position)
             break;
-        }
-
+        case 50:  // 2
+            camera.position.x = 0;
+            camera.position.y = 0;
+            camera.position.z = 0;
+            camera.lookAt(scene.position)
+            break;
+        case 51:  // 3
+            camera.position.x = -1;
+            camera.position.y = 0;
+            camera.position.z = 0;
+            camera.lookAt(scene.position)
+            break;
+        case 52:    //4
+            // scene.traverse(function (node) {
+            //     if (node instanceof THREE.Mesh) {
+            //         node.material.wireframe = !node.material.wireframe;
+            //     }
+            // });
+            objects.forEach(toggleWireframe);
+            break;
+    }
 }
 
 function animate() {
