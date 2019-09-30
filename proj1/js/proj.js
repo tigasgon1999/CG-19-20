@@ -2,9 +2,11 @@
 
 var camera, scene, renderer;
 
-var geometry, material = new Array(), mesh;
+var geometry, material, mesh;
 
-function addTargetSupport(obj, x, y, z, material) {
+var objects = [];
+
+function addTargetSupport(obj, x, y, z) {
   'use strict';
 
   geometry = new THREE.CylinderGeometry(6, 6, 30, 10, 10);
@@ -29,14 +31,14 @@ function createTarget(x, y, z) {
 
   var target = new THREE.Object3D();
 
-  var material2 =
-      new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
-  material.push(material2);
+  material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
 
-  addTargetSupport(target, 0, 10, 0, material2);
-  addTargetTorus(target, 0, 30, 0, material2);
+  addTargetSupport(target, 0, 10, 0);
+  addTargetTorus(target, 0, 30, 0);
 
   scene.add(target);
+
+  objects.push(target);
 
   target.position.x = x;
   target.position.y = y;
@@ -79,20 +81,18 @@ function createTable(x, y, z) {
 
   var table = new THREE.Object3D();
 
-  var material1 =
-      new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true});
+  material = new THREE.MeshBasicMaterial({color: 0x00ff00, wireframe: true});
 
-  material.push(material1);
-
-
-  addTableTop(table, 0, 0, 0, material1);
-  addTableLeg(table, -25, -1, -8, material1);
-  addTableLeg(table, -25, -1, 8, material1);
-  addTableLeg(table, 25, -1, 8, material1);
-  addTableLeg(table, 25, -1, -8, material1);
-  addSphericalCap(table, 0, 0, 0, material1);
+  addTableTop(table, 0, 0, 0);
+  addTableLeg(table, -25, -1, -8);
+  addTableLeg(table, -25, -1, 8);
+  addTableLeg(table, 25, -1, 8);
+  addTableLeg(table, 25, -1, -8);
+  addSphericalCap(table, 0, 0, 0);
 
   scene.add(table);
+
+  objects.push(table);
 
   table.position.x = x;
   table.position.y = y;
@@ -101,12 +101,14 @@ function createTable(x, y, z) {
 
 function createCamera() {
   'use strict';
+  // camera = new THREE.PerspectiveCamera(100, window.innerWidth /
+  // window.innerHeight, 1, 1000);
   camera = new THREE.OrthographicCamera(
       window.innerWidth / -20, window.innerWidth / 20, window.innerHeight / 20,
       window.innerHeight / -20, 0.1, 1000);
 
   camera.position.x = 0;
-  camera.position.y = 0;
+  camera.position.y = -1;
   camera.position.z = 0;
   camera.lookAt(scene.position);
 }
@@ -119,7 +121,7 @@ function createScene() {
   scene.add(new THREE.AxisHelper(10));
 
   createTable(0, 0, 0);
-  createTarget(50, 0, 0);
+  createTarget(40, 0, 0);
 }
 
 function render() {
@@ -138,19 +140,23 @@ function onResize() {
   }
 }
 
+function toggleWireframe(obj) {
+  obj.children[0].material.wireframe = !obj.children[0].material.wireframe;
+}
+
 function onKeyDown(e) {
   'use strict';
 
   switch (e.keyCode) {
     case 49:  // 1
       camera.position.x = 0;
-      camera.position.y = 0;
+      camera.position.y = -1;
       camera.position.z = 0;
       camera.lookAt(scene.position)
       break;
     case 50:  // 2
       camera.position.x = 0;
-      camera.position.y = -1;
+      camera.position.y = 0;
       camera.position.z = 0;
       camera.lookAt(scene.position)
       break;
@@ -159,6 +165,14 @@ function onKeyDown(e) {
       camera.position.y = 0;
       camera.position.z = 0;
       camera.lookAt(scene.position)
+      break;
+    case 52:  // 4
+      // scene.traverse(function (node) {
+      //     if (node instanceof THREE.Mesh) {
+      //         node.material.wireframe = !node.material.wireframe;
+      //     }
+      // });
+      objects.forEach(toggleWireframe);
       break;
   }
 }
