@@ -9,7 +9,7 @@ var objects = [];
 function addTargetSupport(obj, x, y, z) {
     'use strict';
     
-    geometry = new THREE.CylinderGeometry(6, 6, 30, 10, 10);
+    geometry = new THREE.CylinderGeometry(6, 6, 30, 30, 20);
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
     
@@ -31,7 +31,7 @@ function createTarget(x, y, z) {
     
     var target = new THREE.Object3D();
     
-    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, side: THREE.DoubleSide });
     
     addTargetSupport(target, 0, 10, 0);
     addTargetTorus(target, 0, 30, 0);
@@ -58,7 +58,7 @@ function addTableTop(obj, x, y, z) {
 function addTableLeg(obj, x, y, z) {
     'use strict';
     
-    geometry = new THREE.SphereGeometry(2, 7, 7);
+    geometry = new THREE.SphereGeometry(2, 20, 20);
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y - 2, z);
     
@@ -68,7 +68,7 @@ function addTableLeg(obj, x, y, z) {
 function addSphericalCap(obj, x, y, z) {
     'use strict';
     
-    geometry = new THREE.SphereGeometry(5, 7, 7, 0, 6.3, 0, 0.5*Math.PI);   //Semisphere
+    geometry = new THREE.SphereGeometry(5, 20, 20, 0, 6.3, 0, 0.5*Math.PI);   //Semisphere
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y+1, z);
     
@@ -80,7 +80,7 @@ function createTable(x, y, z) {
     
     var table = new THREE.Object3D();
     
-    material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, side: THREE.DoubleSide });
     
     addTableTop(table, 0, 0, 0);
     addTableLeg(table, -25, -1, -8);
