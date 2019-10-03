@@ -14,17 +14,39 @@ class Arm extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addParallelepiped(x, y, z);
-    this.addForearm(x, 16, z);
-    //this.forearm.rotation.z = -Math.PI / 2;
+    this.addSphericalCap(x, 0, z);
+    this.addParallelepiped(x, 2.5, z);
+    this.addForearm(x, 21, z);
+    this.forearm.rotation.z = -Math.PI / 2;
   }
 
-  addParallelepiped(x, y, z){
+  addSphericalCap(x, y, z) {
     'use strict';
 
-    var geometry = new THREE.CubeGeometry(3, 16, 3);
+    var geometry = new THREE.SphereGeometry(
+        2.5, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
+
+    this.add(mesh);
+  }
+
+  addParallelepiped(x, y, z) {
+    'use strict';
+
+    var geometry = new THREE.CubeGeometry(2, 16, 2);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y + 8, z);
+
+    this.add(mesh);
+  }
+
+  addSphere(x, y, z){
+    'use strict';
+
+    var geometry = new THREE.SphereGeometry(2.5, 7, 7);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y + 2, z);
 
     this.add(mesh);
   }
@@ -43,31 +65,31 @@ class Forearm extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addSphere(x, 0, z);
-    this.addParallelepiped(x, 10.5, z);
-    this.addSphere(x,  12, z);
-    this.addHand(x,  16, z);
-    this.addFinger(x - 2,  20, z);
-    this.addFinger(x + 2,  20, z);
+    this.addSphere(x, -2.5, z);
+    this.addParallelepiped(x, 2.5, z);
+    this.addSphere(x,  18.5, z);
+    this.addHand(x,  23.5, z);
+    this.addFinger(x - 2,  25, z);
+    this.addFinger(x + 2,  25, z);
 
   }
 
   addSphere(x, y, z){
     'use strict';
 
-    var geometry = new THREE.SphereGeometry(2.5, 7, 7);
+    var geometry = new THREE.SphereGeometry(2.5, 20, 20);
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y + 2, z);
+    mesh.position.set(x, y+2.5, z);
 
     this.add(mesh);
   }
 
-  addParallelepiped(x, y, z){
+  addParallelepiped(x, y, z) {
     'use strict';
 
-    var geometry = new THREE.CubeGeometry(3, 16, 3);
+    var geometry = new THREE.CubeGeometry(2, 16, 2);
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y, z);
+    mesh.position.set(x, y + 8, z);
 
     this.add(mesh);
   }
@@ -75,9 +97,9 @@ class Forearm extends Object3D {
   addHand(x, y, z){
     'use strict'
 
-    var geometry = new THREE.CubeGeometry(5, 2, 2);
+    var geometry = new THREE.CubeGeometry(5, 1.5, 1);
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y + 2, z);
+    mesh.position.set(x, y +0.75, z);
 
     this.add(mesh);
   }
@@ -87,31 +109,36 @@ class Forearm extends Object3D {
 
     var geometry = new THREE.CubeGeometry(1, 3, 1);
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y, z);
+    mesh.position.set(x, y+1.5, z);
 
     this.add(mesh);
   }
 }
 
-
 class Car extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addTableTop(0, 0, 0);
-    this.addWheel(-25, -1, -8);
-    this.addWheel(-25, -1, 8);
-    this.addWheel(25, -1, -8);
-    this.addWheel(25, -1, 8);
-    this.addSphericalCap(0, 0, 0);
-    this.addArm(x, 7, z)
+    this.addTableTop(x, 4.5, z);
+    this.addWheel(x - 20, 2, z - 7.5);
+    this.addWheel(x - 20, 2, z + 7.5);
+    this.addWheel(x + 20, 2, z - 7.5);
+    this.addWheel(x + 20, 2, z + 7.5);
+
+    this.addArm(0, 5, 0);
+  }
+
+  addArm(x, y, z) {
+    var arm = new Arm(x, y, z, this.material);
+    this.arm = arm;
+    this.add(arm);
   }
 
   addTableTop(x, y, z) {
     'use strict';
 
 
-    var geometry = new THREE.CubeGeometry(60, 2, 20);
+    var geometry = new THREE.CubeGeometry(40, 1, 15);
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
 
@@ -123,18 +150,7 @@ class Car extends Object3D {
 
     var geometry = new THREE.SphereGeometry(2, 7, 7);
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y - 2, z);
-
-    this.add(mesh);
-  }
-
-  addSphericalCap(x, y, z) {
-    'use strict';
-
-    var geometry = new THREE.SphereGeometry(
-        5, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
-    var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y + 1, z);
+    mesh.position.set(x, y, z);
 
     this.add(mesh);
   }
@@ -151,7 +167,7 @@ class Stand extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addCylinder(0, 10, 0);
+    this.addCylinder(x, 15, z);
   }
 
   addCylinder(x, y, z) {
@@ -169,7 +185,7 @@ class Target extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addToroid(0, 0, 0);
+    this.addToroid(x, 5, z);
   }
 
   addToroid(x, y, z) {
