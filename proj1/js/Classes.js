@@ -38,8 +38,6 @@ class Car extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.userData = { movingLeft: false, movingUp: false, movingRight: false, movingDown: false };
-
     this.addTableTop(0, 0, 0);
     this.addWheel(-25, -1, -8);
     this.addWheel(-25, -1, 8);

@@ -2,7 +2,7 @@
 
 var camera, scene, renderer;
 
-var objects = []; // [Car, Stand, Target] 
+var objects = [];
 
 function createCamera() {
   'use strict';
@@ -87,37 +87,6 @@ function onKeyDown(e) {
     case 52:  // 4
       objects.forEach(toggleWireframe);
       break;
-    case 37:  // Arrow left
-      objects[0].userData.movingLeft = !objects[0].userData.movingLeft;
-      break;
-    case 38:  // Arrow up
-      objects[0].userData.movingUp = !objects[0].userData.movingUp;
-      break;
-    case 39:  // Arrow right
-      objects[0].userData.movingRight = !objects[0].userData.movingRight;
-      break;
-    case 40:  // Arrow down
-      objects[0].userData.movingDown= !objects[0].userData.movingDown;
-      break;
-  }
-}
-
-function onKeyUp(e) {
-  'use strict';
-
-  switch (e.keyCode) {
-    case 37:  // Arrow left
-      objects[0].userData.movingLeft = !objects[0].userData.movingLeft;
-      break;
-    case 38:  // Arrow up
-      objects[0].userData.movingUp = !objects[0].userData.movingUp;
-      break;
-    case 39:  // Arrow right
-      objects[0].userData.movingRight = !objects[0].userData.movingRight;
-      break;
-    case 40:  // Arrow down
-      objects[0].userData.movingDown= !objects[0].userData.movingDown;
-      break;
   }
 }
 
@@ -125,27 +94,6 @@ function animate() {
   'use strict';
 
   render();
-
-  // Move left
-  if (objects[0].userData.movingLeft) {
-    objects[0].position.x -= 0.1;
-    console.log("left");
-  }
-  // Move up
-  if (objects[0].userData.movingUp) {
-    objects[0].position.z -= 0.1;
-    console.log("up");
-  }
-  // Move right
-  if (objects[0].userData.movingRight) {
-    objects[0].position.x += 0.1;
-    console.log("right");
-  }
-  // Move down
-  if (objects[0].userData.movingDown) {
-    objects[0].position.z += 0.1;
-    console.log("down");
-  }
 
   requestAnimationFrame(animate);
 }
@@ -166,5 +114,4 @@ function init() {
 
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup', onKeyUp);
 }
