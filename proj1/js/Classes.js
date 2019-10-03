@@ -13,14 +13,38 @@ class Object3D extends THREE.Object3D {
 class Arm extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
-    this.addCube(x, y, z);
-    this.addSphere(x, y, z);
-    this.addForearm(x, y, z);
+
+    this.addShpere(x, y + 12, z);
+    this.addParallelepiped(x, y, z);
+    this.addForearm(x, y + 16, z);
   }
 
-  addCube(x, y, z) {}
-  addSphere(x, y, z) {}
-  addForearm(x, y, z) {}
+  addShpere(x, y, z) {
+    'use strict';
+
+    var geometry = new THREE.SphereGeometry(2, 7, 7);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y + 2, z);
+
+    this.add(mesh);
+  }
+
+  addParallelepiped(x, y, z) {
+    'use strict';
+
+    var geometry = new THREE.CubeGeometry(12, 2, 2);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y, z);
+
+    this.add(mesh);
+  }
+
+  addForearm(x, y, z) {
+    var forearm = new Forearm(x, y, z);
+    this.forearm = forearm;
+    this.forearm.rotation = 90;
+    this.add(forearm);
+  }
 }
 
 class Car extends Object3D {
