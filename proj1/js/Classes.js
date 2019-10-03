@@ -15,9 +15,8 @@ class Arm extends Object3D {
     super(x, y, z, material);
 
     this.addSphericalCap(x, 0, z);
-    this.addSphere(x, 18.5, z);
     this.addParallelepiped(x, 2.5, z);
-    // this.addForearm(x, 22.5, z);
+    // this.addForearm(x, 18.5, z);
   }
 
   addSphericalCap(x, y, z) {
@@ -27,16 +26,6 @@ class Arm extends Object3D {
         2.5, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
-
-    this.add(mesh);
-  }
-
-  addSphere(x, y, z) {
-    'use strict';
-
-    var geometry = new THREE.SphereGeometry(2, 7, 7);
-    var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y + 2, z);
 
     this.add(mesh);
   }
