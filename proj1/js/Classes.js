@@ -14,13 +14,38 @@ class Arm extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addLowerArm();
-    this.addUpperArm();
+    this.addShpere(x, y + 12, z);
+    this.addParallelepiped(x, y, z);
+    this.addForearm(x, y + 16, z);
   }
 
-  addLowerArm() {}
+  addShpere(x, y, z){
+    'use strict';
 
-  addUpperArm() {}
+    var geometry = new THREE.SphereGeometry(2, 7, 7);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y + 2, z);
+
+    this.add(mesh);
+  }
+
+  addParallelepiped(x, y, z){
+    'use strict';
+
+    var geometry = new THREE.CubeGeometry(12, 2, 2);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y, z);
+
+    this.add(mesh);
+  }
+  
+  addForearm(x, y, z){
+    var forearm = new Forearm(x, y, z);
+    this.forearm = forearm;
+    this.forearm.rotation = 90;
+    this.add(forearm);
+  }
+
 }
 
 
@@ -28,8 +53,47 @@ class Forearm extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addSphere();
-    this.addCylinder();
+    this.addParallelepiped(x, y, z);
+    this.addSphere(x, y + 12, z);
+    this.addHand(x, y + 16, z);
+    this.addFinger(x - 2.5, y + 18, z);
+    this.addFinger(x + 2.5, y + 18, z);
+  }
+
+  addShpere(x, y, z){
+    'use strict';
+
+    var geometry = new THREE.SphereGeometry(2, 7, 7);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y + 2, z);
+
+    this.add(mesh);
+  }
+
+  addParallelepiped(x, y, z){
+    'use strict';
+
+    var geometry = new THREE.CubeGeometry(12, 3, 3);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y, z);
+
+    this.add(mesh);
+  }
+
+  addHand(x, y, z){
+    var geometry = new THREE.CubeGeometry(5, 2, 2);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y + 2, z);
+
+    this.add(mesh);
+  }
+
+  addFinger(x, y, z){
+    var geometry = new THREE.CubeGeometry(3, 1, 1);
+    var mesh = new THREE.Mesh(geometry, this.material);
+    mesh.position.set(x, y, z);
+
+    this.add(mesh);
   }
 }
 
