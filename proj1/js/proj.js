@@ -15,7 +15,7 @@ function createCamera() {
 
   /*camera = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.x = 80;
+  camera.position.x = -80;
   camera.position.y = 60;
   camera.position.z = 100;
   camera.lookAt(scene.position);*/
@@ -26,9 +26,19 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  scene.add(new THREE.AxisHelper(30));
-
   var material;
+
+  // scene.add(new THREE.AxisHelper(30));
+
+  // Floor for debug
+  /*
+  var geometry = new THREE.PlaneGeometry(100000, 100000, 10000);
+  material = new THREE.MeshBasicMaterial(
+      {color: 0xD3D3D3, side: THREE.DoubleSide, wireframe: true});
+  var plane = new THREE.Mesh(geometry, material);
+  plane.rotateX(-Math.PI / 2);
+  scene.add(plane);
+  */
 
   material = new THREE.MeshBasicMaterial(
       {color: 0x00ff00, wireframe: true, side: THREE.DoubleSide});
@@ -95,16 +105,16 @@ function onKeyDown(e) {
       objects.forEach(toggleWireframe);
       break;
     case 37:  // Arrow left
-      objects[0].userData.movingLeft = !objects[0].userData.movingLeft;
+      objects[0].left = true;
       break;
     case 38:  // Arrow up
-      objects[0].userData.movingUp = !objects[0].userData.movingUp;
+      objects[0].front = true;
       break;
     case 39:  // Arrow right
-      objects[0].userData.movingRight = !objects[0].userData.movingRight;
+      objects[0].right = true;
       break;
     case 40:  // Arrow down
-      objects[0].userData.movingDown = !objects[0].userData.movingDown;
+      objects[0].back = true;
       break;
   }
 }
@@ -114,16 +124,16 @@ function onKeyUp(e) {
 
   switch (e.keyCode) {
     case 37:  // Arrow left
-      objects[0].userData.movingLeft = !objects[0].userData.movingLeft;
+      objects[0].left = false;
       break;
     case 38:  // Arrow up
-      objects[0].userData.movingUp = !objects[0].userData.movingUp;
+      objects[0].front = false;
       break;
     case 39:  // Arrow right
-      objects[0].userData.movingRight = !objects[0].userData.movingRight;
+      objects[0].right = false;
       break;
     case 40:  // Arrow down
-      objects[0].userData.movingDown = !objects[0].userData.movingDown;
+      objects[0].back = false;
       break;
   }
 }
@@ -134,24 +144,24 @@ function animate() {
   render();
 
   // Move left
-  if (objects[0].userData.movingLeft) {
-    objects[0].position.x -= 0.1;
-    console.log('left');
+  if (objects[0].back) {
+    objects[0].position.x -= 0.2;
+    console.log('back');
   }
   // Move up
-  if (objects[0].userData.movingUp) {
-    objects[0].position.z -= 0.1;
-    console.log('up');
+  if (objects[0].left) {
+    objects[0].position.z -= 0.2;
+    console.log('left');
   }
   // Move right
-  if (objects[0].userData.movingRight) {
-    objects[0].position.x += 0.1;
-    console.log('right');
+  if (objects[0].front) {
+    objects[0].position.x += 0.2;
+    console.log('front');
   }
   // Move down
-  if (objects[0].userData.movingDown) {
-    objects[0].position.z += 0.1;
-    console.log('down');
+  if (objects[0].right) {
+    objects[0].position.z += 0.2;
+    console.log('right');
   }
 
   requestAnimationFrame(animate);
