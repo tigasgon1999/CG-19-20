@@ -13,44 +13,41 @@ class Object3D extends THREE.Object3D {
 class Arm extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
-
-    this.addLowerArm();
-    this.addUpperArm();
+    this.addCube(x, y, z);
+    this.addSphere(x, y, z);
+    this.addForearm(x, y, z);
   }
 
-  addLowerArm() {}
-
-  addUpperArm() {}
+  addCube(x, y, z) {}
+  addSphere(x, y, z) {}
+  addForearm(x, y, z) {}
 }
-
-
-class Forearm extends Object3D {
-  constructor(x, y, z, material) {
-    super(x, y, z, material);
-
-    this.addSphere();
-    this.addCylinder();
-  }
-}
-
 
 class Car extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addTableTop(0, 0, 0);
-    this.addWheel(-25, -1, -8);
-    this.addWheel(-25, -1, 8);
-    this.addWheel(25, -1, -8);
-    this.addWheel(25, -1, 8);
-    this.addSphericalCap(0, 0, 0)
+    this.addTableTop(x, 4.5, z);
+    this.addWheel(x - 20, 2, z - 7.5);
+    this.addWheel(x - 20, 2, z + 7.5);
+    this.addWheel(x + 20, 2, z - 7.5);
+    this.addWheel(x + 20, 2, z + 7.5);
+    this.addSphericalCap(x, 5, z);
+
+    // this.addArm(0, 5, 0);
+  }
+
+  addArm(x, y, z) {
+    var arm = new Arm(x, y, z, this.material);
+    this.arm = arm;
+    this.add(arm);
   }
 
   addTableTop(x, y, z) {
     'use strict';
 
 
-    var geometry = new THREE.CubeGeometry(60, 2, 20);
+    var geometry = new THREE.CubeGeometry(40, 1, 15);
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
 
@@ -62,7 +59,7 @@ class Car extends Object3D {
 
     var geometry = new THREE.SphereGeometry(2, 7, 7);
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y - 2, z);
+    mesh.position.set(x, y, z);
 
     this.add(mesh);
   }
@@ -71,9 +68,9 @@ class Car extends Object3D {
     'use strict';
 
     var geometry = new THREE.SphereGeometry(
-        5, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
+        2.5, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
     var mesh = new THREE.Mesh(geometry, this.material);
-    mesh.position.set(x, y + 1, z);
+    mesh.position.set(x, y, z);
 
     this.add(mesh);
   }
@@ -83,7 +80,7 @@ class Stand extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addCylinder(0, 10, 0);
+    this.addCylinder(x, 15, z);
   }
 
   addCylinder(x, y, z) {
@@ -101,7 +98,7 @@ class Target extends Object3D {
   constructor(x, y, z, material) {
     super(x, y, z, material);
 
-    this.addToroid(0, 0, 0);
+    this.addToroid(x, 5, z);
   }
 
   addToroid(x, y, z) {

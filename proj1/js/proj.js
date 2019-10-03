@@ -12,6 +12,13 @@ function createCamera() {
 
   camera.position.z = 500;
   camera.lookAt(scene.position);
+
+  /*camera = new THREE.PerspectiveCamera(
+      50, window.innerWidth / window.innerHeight, 1, 1000);
+  camera.position.x = 80;
+  camera.position.y = 60;
+  camera.position.z = 100;
+  camera.lookAt(scene.position);*/
 }
 
 function createScene() {
@@ -19,9 +26,9 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  scene.add(new THREE.AxisHelper(10));
+  scene.add(new THREE.AxisHelper(30));
 
-  var material, geometry;
+  var material;
 
   material = new THREE.MeshBasicMaterial(
       {color: 0x00ff00, wireframe: true, side: THREE.DoubleSide});
@@ -87,6 +94,8 @@ function onKeyDown(e) {
     case 52:  // 4
       objects.forEach(toggleWireframe);
       break;
+    case 58:  // 0
+      camera.lookAt(scene);
   }
 }
 
