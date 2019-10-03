@@ -28,33 +28,27 @@ function createScene() {
 
   var material;
 
-  // scene.add(new THREE.AxisHelper(30));
+  // scene.add(new THREE.AxisHelper(5));
 
   // Floor for debug
-  /*
-  var geometry = new THREE.PlaneGeometry(100000, 100000, 10000);
-  material = new THREE.MeshBasicMaterial(
-      {color: 0xD3D3D3, side: THREE.DoubleSide, wireframe: true});
-  var plane = new THREE.Mesh(geometry, material);
-  plane.rotateX(-Math.PI / 2);
-  scene.add(plane);
-  */
 
-  material = new THREE.MeshBasicMaterial(
-      {color: 0x00ff00, wireframe: true, side: THREE.DoubleSide});
-  var car = new Car(0, 0, 0, material);
+  /* var geometry = new THREE.PlaneGeometry(100000, 100000, 1000);
+   material = new THREE.MeshBasicMaterial(
+       {color: 0xD3D3D3, side: THREE.DoubleSide, wireframe: true});
+   var plane = new THREE.Mesh(geometry, material);
+   plane.rotateX(-Math.PI / 2);
+   scene.add(plane);
+
+ */
+  var car = new Car(0, 0, 0);
   objects.push(car);
   scene.add(car);
 
-  material = new THREE.MeshBasicMaterial(
-      {color: 0xff0000, wireframe: true, side: THREE.DoubleSide});
   var stand = new Stand(40, 0, 0, material);
   objects.push(stand);
   scene.add(stand)
 
-  material = new THREE.MeshBasicMaterial(
-      {color: 0x0000ff, wireframe: true, side: THREE.DoubleSide});
-  var target = new Target(40, 30, 0, material);
+  var target = new Target(40, 30, 0);
   objects.push(target);
   scene.add(target);
 }
@@ -76,7 +70,7 @@ function onResize() {
 }
 
 function toggleWireframe(obj) {
-  obj.material.wireframe = !obj.material.wireframe;
+  obj.toggleWireframe();
 }
 
 function onKeyDown(e) {
@@ -116,6 +110,18 @@ function onKeyDown(e) {
     case 40:  // Arrow down
       objects[0].back = true;
       break;
+    case 87:  // W
+      objects[0].armFront = true;
+      break;
+    case 81:  // Q
+      objects[0].armBack = true;
+      break;
+    case 65:  // A
+      objects[0].armLeft = true;
+      break;
+    case 83:  // S
+      objects[0].armRight = true;
+      break;
   }
 }
 
@@ -135,34 +141,58 @@ function onKeyUp(e) {
     case 40:  // Arrow down
       objects[0].back = false;
       break;
+    case 87:  // W
+      objects[0].armFront = false;
+      break;
+    case 81:  // Q
+      objects[0].armBack = false;
+      break;
+    case 65:  // A
+      objects[0].armLeft = false;
+      break;
+    case 83:  // S
+      objects[0].armRight = false;
+      break;
   }
 }
 
 function animate() {
   'use strict';
 
-  render();
-
   // Move left
   if (objects[0].back) {
-    objects[0].position.x -= 0.2;
-    console.log('back');
+    objects[0].moveX(-0.2);
   }
   // Move up
   if (objects[0].left) {
-    objects[0].position.z -= 0.2;
-    console.log('left');
+    objects[0].moveZ(-0.2);
   }
   // Move right
   if (objects[0].front) {
-    objects[0].position.x += 0.2;
-    console.log('front');
+    objects[0].moveX(0.2);
   }
   // Move down
   if (objects[0].right) {
-    objects[0].position.z += 0.2;
-    console.log('right');
+    objects[0].moveZ(0.2);
   }
+  // Arm front
+  if (objects[0].armFront) {
+    objects[0].rotateZ(-0.01);
+  }
+  // Arm back
+  if (objects[0].armBack) {
+    objects[0].rotateZ(0.01);
+  }
+  // Arm left
+  if (objects[0].armLeft) {
+    objects[0].rotateY(0.01);
+  }
+  // Arm right
+  if (objects[0].armRight) {
+    objects[0].rotateY(-0.01);
+  }
+
+  render();
 
   requestAnimationFrame(animate);
 }
