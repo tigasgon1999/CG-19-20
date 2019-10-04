@@ -1,5 +1,6 @@
 class Object3D extends THREE.Object3D {
   constructor(x, y, z) {
+    'use strict';
     super();
 
     this.position.x = x;
@@ -10,6 +11,7 @@ class Object3D extends THREE.Object3D {
 
 class Forearm extends Object3D {
   constructor(x, y, z) {
+    'use strict';
     super(x, y, z);
     this.materials = {
       sphere: new THREE.MeshBasicMaterial(
@@ -29,12 +31,14 @@ class Forearm extends Object3D {
   }
 
   toggleWireframe() {
+    'use strict';
     this.materials.sphere.wireframe = !this.materials.sphere.wireframe;
     this.materials.cube.wireframe = !this.materials.cube.wireframe;
     this.materials.hand.wireframe = !this.materials.hand.wireframe;
   }
 
   rotateZ(delta) {
+    'use strict';
     this.rotation.z += delta;
   }
 
@@ -81,6 +85,7 @@ class Forearm extends Object3D {
 
 class Arm extends Object3D {
   constructor(x, y, z) {
+    'use strict';
     super(x, y, z);
 
     this.material = new THREE.MeshBasicMaterial(
@@ -92,15 +97,18 @@ class Arm extends Object3D {
   }
 
   toggleWireframe() {
+    'use strict';
     this.material.wireframe = !this.material.wireframe;
     this.forearm.toggleWireframe();
   }
 
   rotateY(delta) {
+    'use strict';
     this.rotation.y += delta;
   }
 
   rotateZ(delta) {
+    'use strict';
     this.rotation.z += delta;
   }
 
@@ -116,6 +124,7 @@ class Arm extends Object3D {
   }
 
   addForearm(x, y, z) {
+    'use strict';
     var forearm = new Forearm(x, y - 0.2, z);
     this.forearm = forearm;
 
@@ -125,6 +134,7 @@ class Arm extends Object3D {
 
 class Car extends Object3D {
   constructor(x, y, z) {
+    'use strict';
     super(x, y, z);
     this.materials = {
       car: new THREE.MeshBasicMaterial(
@@ -146,6 +156,7 @@ class Car extends Object3D {
   }
 
   toggleWireframe() {
+    'use strict';
     this.materials.car.wireframe = !this.materials.car.wireframe;
     this.materials.wheel.wireframe = !this.materials.wheel.wireframe;
     this.materials.sphere.wireframe = !this.materials.sphere.wireframe;
@@ -153,18 +164,22 @@ class Car extends Object3D {
   }
 
   moveX(delta) {
+    'use strict';
     this.position.x += delta;
   }
 
   moveZ(delta) {
+    'use strict';
     this.position.z += delta;
   }
 
   rotateY(delta) {
+    'use strict';
     this.arm.rotateY(delta);
   }
 
   rotateZ(delta) {
+    'use strict';
     this.arm.rotateZ(delta)
   }
 
@@ -180,6 +195,7 @@ class Car extends Object3D {
   }
 
   addArm(x, y, z) {
+    'use strict';
     var arm = new Arm(x, y, z);
     this.arm = arm;
     this.add(arm);
@@ -209,6 +225,7 @@ class Car extends Object3D {
 
 class Stand extends Object3D {
   constructor(x, y, z) {
+    'use strict';
     super(x, y, z);
 
     this.material = new THREE.MeshBasicMaterial(
@@ -234,6 +251,7 @@ class Stand extends Object3D {
 
 class Target extends Object3D {
   constructor(x, y, z) {
+    'use strict';
     super(x, y, z);
 
     this.material = new THREE.MeshBasicMaterial(
@@ -253,6 +271,7 @@ class Target extends Object3D {
   }
 
   toggleWireframe() {
+    'use strict';
     this.material.wireframe = !this.material.wireframe;
   }
 }

@@ -70,6 +70,7 @@ function onResize() {
 }
 
 function toggleWireframe(obj) {
+  'use strict';
   obj.toggleWireframe();
 }
 
@@ -159,19 +160,19 @@ function onKeyUp(e) {
 function animate() {
   'use strict';
 
-  // Move left
+  // Move back
   if (objects[0].back) {
     objects[0].moveX(-0.2);
   }
-  // Move up
+  // Move left
   if (objects[0].left) {
     objects[0].moveZ(-0.2);
   }
-  // Move right
+  // Move front
   if (objects[0].front) {
     objects[0].moveX(0.2);
   }
-  // Move down
+  // Move right
   if (objects[0].right) {
     objects[0].moveZ(0.2);
   }
