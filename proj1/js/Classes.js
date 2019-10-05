@@ -26,8 +26,8 @@ class Forearm extends Object3D {
     this.addParallelepiped(x, 2.5, z);
     this.addSphere(x, 18.3, z);
     this.addHand(x, 23.5, z);
-    this.addFinger(x - 2, 25, z);
-    this.addFinger(x + 2, 25, z);
+    this.finger1 = this.addFinger(x - 2, 25, z);
+    this.finger2 = this.addFinger(x + 2, 25, z);
   }
 
   toggleWireframe() {
@@ -80,6 +80,8 @@ class Forearm extends Object3D {
     mesh.position.set(x, y + 1.5, z);
 
     this.add(mesh);
+
+    return mesh;
   }
 }
 
@@ -155,6 +157,31 @@ class Car extends Object3D {
     this.addArm(0, 5, 0);
   }
 
+  checkRotation(delta) {
+    var v1 = new THREE.Vector3();
+    var v2 = new THREE.Vector3();
+    var v3 = new THREE.Vector3();
+    if (delta < 0) {
+      this.arm.forearm.finger1.localToWorld(v1);
+      this.arm.forearm.finger2.localToWorld(v2);
+      v1.y -= 1.5;
+      v2.y -= 1.5;
+      if (v1.y < 0.2 || v2.y < 0.2) {
+        return false;
+      }
+      return true;
+    } else if (delta > 0) {
+      v3.y = -8;
+      v3.x = -1;
+      this.arm.pipe.localToWorld(v3);
+      if (v3.y < 5) {
+        return false;
+      }
+      return true;
+    }
+    return true;
+  }
+
   toggleWireframe() {
     'use strict';
     this.materials.car.wireframe = !this.materials.car.wireframe;
@@ -180,7 +207,9 @@ class Car extends Object3D {
 
   rotateZ(delta) {
     'use strict';
-    this.arm.rotateZ(delta)
+    if (this.checkRotation(delta)) {
+      this.arm.rotateZ(delta);
+    }
   }
 
   addSphericalCap(x, y, z) {
@@ -190,6 +219,7 @@ class Car extends Object3D {
         2.5, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
     var mesh = new THREE.Mesh(geometry, this.materials.sphere);
     mesh.position.set(x, y, z);
+    this.sphericalCap = mesh;
 
     this.add(mesh);
   }

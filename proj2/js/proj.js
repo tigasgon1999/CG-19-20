@@ -6,19 +6,13 @@ var objects = [];  // [Car, Stand, Target]
 
 function createCamera() {
   'use strict';
-  camera = new THREE.OrthographicCamera(
-      window.innerWidth / -20, window.innerWidth / 20, window.innerHeight / 20,
-      window.innerHeight / -20, 0.1, 1000);
 
-  camera.position.z = 500;
-  camera.lookAt(scene.position);
-
-  /*camera = new THREE.PerspectiveCamera(
+  camera = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.x = -80;
+  camera.position.x = 200;
   camera.position.y = 60;
-  camera.position.z = 100;
-  camera.lookAt(scene.position);*/
+  camera.position.z = 0;
+  camera.lookAt(scene.position);
 }
 
 function createScene() {
@@ -28,17 +22,33 @@ function createScene() {
 
   var material;
 
-  var car = new Car(0, 0, 0);
-  objects.push(car);
-  scene.add(car);
+  // scene.add(new THREE.AxisHelper(5));
 
-  var stand = new Stand(40, 0, 0, material);
-  objects.push(stand);
-  scene.add(stand)
+  // Floor for debug
 
-  var target = new Target(40, 30, 0);
-  objects.push(target);
-  scene.add(target);
+  /* var geometry = new THREE.PlaneGeometry(100000, 100000, 1000);
+   material = new THREE.MeshBasicMaterial(
+       {color: 0xD3D3D3, side: THREE.DoubleSide, wireframe: true});
+   var plane = new THREE.Mesh(geometry, material);
+   plane.rotateX(-Math.PI / 2);
+   scene.add(plane);
+
+ */
+  var wall1 = new Wall(0, 0, 0, 30, 0);
+  objects.push(wall1);
+  scene.add(wall1);
+
+  var wall2 = new Wall(30, 0, -30, 30, Math.PI / 2);
+  objects.push(wall2);
+  scene.add(wall2);
+
+  var wall3 = new Wall(30, 0, 30, 30, Math.PI / 2);
+  objects.push(wall3);
+  scene.add(wall3);
+
+  var ball = new Ball(10, 0, 10, 5);
+  objects.push(ball);
+  scene.add(ball)
 }
 
 function render() {
