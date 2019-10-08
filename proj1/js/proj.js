@@ -1,6 +1,6 @@
 /*global THREE*/
 
-var camera, scene, renderer;
+var camera, scene, renderer, k = 1;
 
 var objects = [];  // [Car, Stand, Target]
 
@@ -26,15 +26,13 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  var material;
-
-  var car = new Car(0, 0, 0);
+  var car = new Car(0, 0, 0, k);
   objects.push(car);
   scene.add(car);
 
-  var stand = new Stand(40, 0, 0, material);
+  var stand = new Stand(40, 0, 0);
   objects.push(stand);
-  scene.add(stand)
+  scene.add(stand);
 
   var target = new Target(40, 30, 0);
   objects.push(target);
@@ -166,11 +164,11 @@ function animate() {
   }
   // Arm front
   if (objects[0].armFront) {
-    objects[0].rotateZ(-0.01);
+    objects[0].rotateZ(-0.01, k);
   }
   // Arm back
   if (objects[0].armBack) {
-    objects[0].rotateZ(0.01);
+    objects[0].rotateZ(0.01, k);
   }
   // Arm left
   if (objects[0].armLeft) {
