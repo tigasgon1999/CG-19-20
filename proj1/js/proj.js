@@ -4,21 +4,16 @@ var camera, scene, renderer;
 
 var objects = [];  // [Car, Stand, Target]
 
+var camFactor;
+
 function createCamera() {
   'use strict';
   camera = new THREE.OrthographicCamera(
-      window.innerWidth / -20, window.innerWidth / 20, window.innerHeight / 20,
-      window.innerHeight / -20, 0.1, 1000);
+      window.innerWidth / -camFactor, window.innerWidth / camFactor, window.innerHeight / camFactor,
+      window.innerHeight / -camFactor, 0.1, 1000);
 
   camera.position.z = 500;
   camera.lookAt(scene.position);
-
-  /*camera = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.x = -80;
-  camera.position.y = 60;
-  camera.position.z = 100;
-  camera.lookAt(scene.position);*/
 }
 
 function createScene() {
@@ -51,10 +46,11 @@ function onResize() {
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  if (window.innerHeight > 0 && window.innerWidth > 0) {
-    camera.aspect = renderer.getSize().width / renderer.getSize().height;
-    camera.updateProjectionMatrix();
-  }
+  camera.left = -window.innerWidth / camFactor;
+  camera.right = window.innerWidth / camFactor;
+  camera.top = window.innerHeight / camFactor;
+  camera.bottom = -window.innerHeight / camFactor;
+  camera.updateProjectionMatrix();
 }
 
 function toggleWireframe(obj) {
@@ -188,6 +184,8 @@ function animate() {
 
 function init() {
   'use strict';
+
+  camFactor = 20;
 
   renderer = new THREE.WebGLRenderer();
 
