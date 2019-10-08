@@ -1,14 +1,18 @@
 /*global THREE*/
 
 var camera, scene, renderer;
+var v = 20;
+var rotV = 1;
+var time = new Date();
+var camFactor = 20
 
 var objects = [];  // [Car, Stand, Target]
 
 function createCamera() {
   'use strict';
   camera = new THREE.OrthographicCamera(
-      window.innerWidth / -20, window.innerWidth / 20, window.innerHeight / 20,
-      window.innerHeight / -20, 0.1, 1000);
+      window.innerWidth / -camFactor, window.innerWidth / camFactor,
+      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1000);
 
   camera.position.z = 500;
   camera.lookAt(scene.position);
@@ -28,7 +32,11 @@ function createScene() {
 
   var material;
 
-  var car = new Car(0, 0, 0);
+  var car = new Car(
+      0, 0, 0, {l: 40, h: 1, w: 15, c: 0x00ff00}, {r: 2, c: 0xa9a9a9},
+      {r: 2.5, c: 0xff0000}, {l: 2, h: 16, w: 2, c: 0x00ff00},
+      {r: 2.5, c: 0xff0000}, {l: 5, h: 1.5, w: 1, c: 0xffff00},
+      {l: 1, h: 3, w: 1, c: 0xffff00});
   objects.push(car);
   scene.add(car);
 
@@ -47,14 +55,12 @@ function render() {
 }
 
 function onResize() {
-  'use strict';
-
   renderer.setSize(window.innerWidth, window.innerHeight);
-
-  if (window.innerHeight > 0 && window.innerWidth > 0) {
-    camera.aspect = renderer.getSize().width / renderer.getSize().height;
-    camera.updateProjectionMatrix();
-  }
+  camera.left = -window.innerWidth / camFactor;
+  camera.right = window.innerWidth / camFactor;
+  camera.top = window.innerHeight / camFactor;
+  camera.bottom = -window.innerHeight / camFactor;
+  camera.updateProjectionMatrix();
 }
 
 function toggleWireframe(obj) {
@@ -148,37 +154,42 @@ function onKeyUp(e) {
 function animate() {
   'use strict';
 
+  var newTime = new Date();
+
+  var elapsed = (newTime - time) / 1000
+  time = new Date();
+
   // Move back
   if (objects[0].back) {
-    objects[0].moveX(-0.2);
+    objects[0].moveX(-v * elapsed);
   }
   // Move left
   if (objects[0].left) {
-    objects[0].moveZ(-0.2);
+    objects[0].moveZ(-v * elapsed);
   }
   // Move front
   if (objects[0].front) {
-    objects[0].moveX(0.2);
+    objects[0].moveX(v * elapsed);
   }
   // Move right
   if (objects[0].right) {
-    objects[0].moveZ(0.2);
+    objects[0].moveZ(v * elapsed);
   }
   // Arm front
   if (objects[0].armFront) {
-    objects[0].rotateZ(-0.01);
+    objects[0].rotateZ(-rotV * elapsed);
   }
   // Arm back
   if (objects[0].armBack) {
-    objects[0].rotateZ(0.01);
+    objects[0].rotateZ(rotV * elapsed);
   }
   // Arm left
   if (objects[0].armLeft) {
-    objects[0].rotateY(0.01);
+    objects[0].rotateY(rotV * elapsed);
   }
   // Arm right
   if (objects[0].armRight) {
-    objects[0].rotateY(-0.01);
+    objects[0].rotateY(-rotV * elapsed);
   }
 
   render();
