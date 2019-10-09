@@ -2,7 +2,7 @@
 
 var camera, scene, renderer;
 var v = 20;
-var rotV = 1;
+var rotV = 0.5;
 var time = new Date();
 var camFactor = 20;
 var k = 1;

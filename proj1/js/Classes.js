@@ -26,8 +26,8 @@ class Forearm extends Object3D {
     this.addParallelepiped(x, (2.5 * k), z, k);
     this.addSphere(x, (18.3 * k), z, k);
     this.addHand(x, (23.5 * k), z, k);
-    this.addFinger(x - (2 * k), (25 * k), z, k);
-    this.finger = this.addFinger(x + (2 * k), (25 * k), z, k);
+    this.addFinger(x - (3.5 * k), (25 * k), z, k);
+    this.finger = this.addFinger(x + (3.5 * k), (25 * k), z, k);
   }
 
   toggleWireframe() {
@@ -65,7 +65,7 @@ class Forearm extends Object3D {
   addHand(x, y, z, k) {
     'use strict'
 
-    var geometry = new THREE.CubeGeometry((5 * k), (1.5 * k), (1 * k));
+    var geometry = new THREE.CubeGeometry((8 * k), (1.5 * k), (1 * k));
     var mesh = new THREE.Mesh(geometry, this.materials.hand);
     mesh.position.set(x, y + (0.65 * k), z);
 
@@ -75,9 +75,9 @@ class Forearm extends Object3D {
   addFinger(x, y, z, k) {
     'use strict'
 
-    var geometry = new THREE.CubeGeometry((1 * k), (3 * k), (1 * k));
+    var geometry = new THREE.CubeGeometry((1 * k), (4 * k), (1 * k));
     var mesh = new THREE.Mesh(geometry, this.materials.hand);
-    mesh.position.set(x, y + (1.5 * k), z);
+    mesh.position.set(x, y + (2 * k), z);
 
     this.add(mesh);
 
@@ -296,7 +296,7 @@ class Target extends Object3D {
     this.material = new THREE.MeshBasicMaterial(
         {color: 0xFFB6C1, wireframe: true, side: THREE.DoubleSide});
 
-    this.addToroid(x, 5, z);
+    this.addToroid(x, 5.5, z);
   }
 
   addToroid(x, y, z) {
