@@ -9,6 +9,8 @@ var k = 1;
 
 var objects = [];  // [Car, Stand, Target]
 
+var camFactor;
+
 function createCamera() {
   'use strict';
   camera = new THREE.OrthographicCamera(
@@ -206,6 +208,8 @@ function animate() {
 
 function init() {
   'use strict';
+
+  camFactor = 20;
 
   renderer = new THREE.WebGLRenderer();
 
