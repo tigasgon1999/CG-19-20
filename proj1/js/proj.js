@@ -4,7 +4,8 @@ var camera, scene, renderer;
 var v = 20;
 var rotV = 1;
 var time = new Date();
-var camFactor = 20
+var camFactor = 20;
+var k = 1;
 
 var objects = [];  // [Car, Stand, Target]
 
@@ -16,13 +17,6 @@ function createCamera() {
 
   camera.position.z = 500;
   camera.lookAt(scene.position);
-
-  /*camera = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.x = -80;
-  camera.position.y = 60;
-  camera.position.z = 100;
-  camera.lookAt(scene.position);*/
 }
 
 function createScene() {
@@ -30,19 +24,13 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  var material;
-
-  var car = new Car(
-      0, 0, 0, {l: 40, h: 1, w: 15, c: 0x00ff00}, {r: 2, c: 0xa9a9a9},
-      {r: 2.5, c: 0xff0000}, {l: 2, h: 16, w: 2, c: 0x00ff00},
-      {r: 2.5, c: 0xff0000}, {l: 5, h: 1.5, w: 1, c: 0xffff00},
-      {l: 1, h: 3, w: 1, c: 0xffff00});
+  var car = new Car(0, 0, 0, k);
   objects.push(car);
   scene.add(car);
 
-  var stand = new Stand(40, 0, 0, material);
+  var stand = new Stand(40, 0, 0);
   objects.push(stand);
-  scene.add(stand)
+  scene.add(stand);
 
   var target = new Target(40, 30, 0);
   objects.push(target);
@@ -117,6 +105,14 @@ function onKeyDown(e) {
     case 83:  // S
       objects[0].armRight = true;
       break;
+    case 57:  // 9
+      k = 2;
+      objects[0].scaleBool = true;
+      break;
+    case 48:  // 0
+      k = 0.5;
+      objects[0].scaleBool = true;
+      break;
   }
 }
 
@@ -157,24 +153,31 @@ function animate() {
   var newTime = new Date();
 
   var elapsed = (newTime - time) / 1000
-  time = new Date();
+  time = newTime;
+
+  var vec = new THREE.Vector3();
 
   // Move back
   if (objects[0].back) {
-    objects[0].moveX(-v * elapsed);
+    vec.x -= 1;
   }
   // Move left
   if (objects[0].left) {
-    objects[0].moveZ(-v * elapsed);
+    vec.z -= 1;
   }
   // Move front
   if (objects[0].front) {
-    objects[0].moveX(v * elapsed);
+    vec.x += 1;
   }
   // Move right
   if (objects[0].right) {
-    objects[0].moveZ(v * elapsed);
+    vec.z += 1;
   }
+  if (objects[0].left || objects[0].right || objects[0].front ||
+      objects[0].back) {
+    objects[0].move(vec, v, elapsed);
+  }
+
   // Arm front
   if (objects[0].armFront) {
     objects[0].rotateZ(-rotV * elapsed);
@@ -190,6 +193,10 @@ function animate() {
   // Arm right
   if (objects[0].armRight) {
     objects[0].rotateY(-rotV * elapsed);
+  }
+  if (objects[0].scaleBool) {
+    objects[0].scaleBool = false;
+    objects[0].scaleObj(k);
   }
 
   render();
@@ -208,8 +215,6 @@ function init() {
 
   createScene();
   createCamera();
-
-  render();
 
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
