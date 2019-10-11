@@ -17,7 +17,7 @@ function createCamera() {
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
       window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1000);
 
-  camera.position.z = 500;
+  camera.position.y = 500;
   camera.lookAt(scene.position);
 }
 
@@ -107,14 +107,6 @@ function onKeyDown(e) {
     case 83:  // S
       objects[0].armRight = true;
       break;
-    case 57:  // 9
-      k = 2;
-      objects[0].scaleBool = true;
-      break;
-    case 48:  // 0
-      k = 0.5;
-      objects[0].scaleBool = true;
-      break;
   }
 }
 
@@ -195,10 +187,6 @@ function animate() {
   // Arm right
   if (objects[0].armRight) {
     objects[0].rotateY(-rotV * elapsed);
-  }
-  if (objects[0].scaleBool) {
-    objects[0].scaleBool = false;
-    objects[0].scaleObj(k);
   }
 
   render();
