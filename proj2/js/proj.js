@@ -1,18 +1,35 @@
 /*global THREE*/
 
-var camera, scene, renderer;
+var cameras = [], scene, renderer, camFactor = 10;
+var camera = 0;
 
-var objects = [];  // [Car, Stand, Target]
+var walls = [];
+var cannons = [];
+var balls = [];
+var cannon = 1;
+var rotV = 0.5;
+var time = new Date();
+var h = 30;  // Height of walls
+var r = 2;   // Radius of balls
+var N = 7;   // Number of balls
 
 function createCamera() {
   'use strict';
 
-  camera = new THREE.PerspectiveCamera(
+  var cameraP = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 1000);
-  camera.position.x = 200;
-  camera.position.y = 60;
-  camera.position.z = 0;
-  camera.lookAt(scene.position);
+  cameraP.position.x = 60;
+  cameraP.position.y = 120;
+  cameraP.position.z = 100;
+  cameras.push(cameraP)
+  cameraP.lookAt(scene.position);
+
+  var cameraO = new THREE.OrthographicCamera(
+      window.innerWidth / -camFactor, window.innerWidth / camFactor,
+      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1000);
+
+  cameraO.position.y = 1000;
+  cameras.push(cameraO);
 }
 
 function createScene() {
@@ -20,40 +37,54 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  var material;
 
-  // scene.add(new THREE.AxisHelper(5));
-
-  // Floor for debug
-
-  /* var geometry = new THREE.PlaneGeometry(100000, 100000, 1000);
-   material = new THREE.MeshBasicMaterial(
-       {color: 0xD3D3D3, side: THREE.DoubleSide, wireframe: true});
-   var plane = new THREE.Mesh(geometry, material);
-   plane.rotateX(-Math.PI / 2);
-   scene.add(plane);
-
- */
-  var wall1 = new Wall(0, 0, 0, 30, 0);
-  objects.push(wall1);
+  var wall1 = new Wall(-3 * h, 0, 0, h, 0);
+  walls.push(wall1);
   scene.add(wall1);
 
-  var wall2 = new Wall(30, 0, -30, 30, Math.PI / 2);
-  objects.push(wall2);
+  var wall2 = new Wall(-1.5 * h, 0, -1.5 * h, h, Math.PI / 2);
+  walls.push(wall2);
   scene.add(wall2);
 
-  var wall3 = new Wall(30, 0, 30, 30, Math.PI / 2);
-  objects.push(wall3);
+  var wall3 = new Wall(-1.5 * h, 0, 1.5 * h, h, Math.PI / 2);
+  walls.push(wall3);
   scene.add(wall3);
 
-  var ball = new Ball(10, 0, 10, 5);
-  objects.push(ball);
-  scene.add(ball)
+  for (var i = 0; i < N; i++) {
+    var valid = false;
+    var ball = new Ball(0, 0, 0, r, 0);
+    while (!valid) {
+      valid = true;
+      var randx = -3 * h + (Math.random() * 1.5 * h) + 2 * r;
+      var randz = (Math.random() * 2 * h) - h;
+      ball.position.x = randx;
+      ball.position.z = randz;
+      for (var j = 0; j < balls.length; j++) {
+        if (balls[j].isCoincident(ball)) {
+          valid = false;
+        }
+      }
+    }
+    balls.push(ball);
+    scene.add(ball);
+  }
+
+  var cannon1 = new Cannon(20, 0, 1.5 * h - 10, 1, Math.PI - 0.2);
+  cannons.push(cannon1);
+  scene.add(cannon1);
+
+  var cannon2 = new Cannon(20, 0, 0, 1, Math.PI);
+  cannons.push(cannon2);
+  scene.add(cannon2);
+
+  var cannon3 = new Cannon(20, 0, 10 - (1.5 * h), 1, Math.PI + 0.2);
+  cannons.push(cannon3);
+  scene.add(cannon3);
 }
 
 function render() {
   'use strict';
-  renderer.render(scene, camera);
+  renderer.render(scene, cameras[camera]);
 }
 
 function onResize() {
@@ -61,9 +92,18 @@ function onResize() {
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  if (window.innerHeight > 0 && window.innerWidth > 0) {
-    camera.aspect = renderer.getSize().width / renderer.getSize().height;
-    camera.updateProjectionMatrix();
+  if (camera == 0) {
+    if (window.innerHeight > 0 && window.innerWidth > 0) {
+      cameras[camera].aspect =
+          renderer.getSize().width / renderer.getSize().height;
+      cameras[camera].updateProjectionMatrix();
+    }
+  } else {
+    cameras[camera].left = -window.innerWidth / camFactor;
+    cameras[camera].right = window.innerWidth / camFactor;
+    cameras[camera].top = window.innerHeight / camFactor;
+    cameras[camera].bottom = -window.innerHeight / camFactor;
+    cameras[camera].updateProjectionMatrix();
   }
 }
 
@@ -73,53 +113,27 @@ function toggleWireframe(obj) {
 }
 
 function onKeyDown(e) {
-  'use strict';
-
   switch (e.keyCode) {
     case 49:  // 1
-      camera.position.x = 0;
-      camera.position.y = 500;
-      camera.position.z = 0
-      camera.lookAt(scene.position)
+      camera = 0;
       break;
     case 50:  // 2
-      camera.position.x = 0;
-      camera.position.y = 0;
-      camera.position.z = 500
-      camera.lookAt(scene.position)
+      camera = 1;
       break;
-    case 51:  // 3
-      camera.position.x = -500;
-      camera.position.y = 0;
-      camera.position.z = 0
-      camera.lookAt(scene.position)
+    case 81:  // q
+      cannon = 0;
       break;
-    case 52:  // 4
-      objects.forEach(toggleWireframe);
+    case 87:  // w
+      cannon = 1;
       break;
-    case 37:  // Arrow left
-      objects[0].left = true;
+    case 69:  // e
+      cannon = 2;
       break;
-    case 38:  // Arrow up
-      objects[0].front = true;
+    case 37:  // <-
+      cannons[cannon].left = true;
       break;
-    case 39:  // Arrow right
-      objects[0].right = true;
-      break;
-    case 40:  // Arrow down
-      objects[0].back = true;
-      break;
-    case 87:  // W
-      objects[0].armFront = true;
-      break;
-    case 81:  // Q
-      objects[0].armBack = true;
-      break;
-    case 65:  // A
-      objects[0].armLeft = true;
-      break;
-    case 83:  // S
-      objects[0].armRight = true;
+    case 39:  // ->
+      cannons[cannon].right = true;
       break;
   }
 }
@@ -128,29 +142,11 @@ function onKeyUp(e) {
   'use strict';
 
   switch (e.keyCode) {
-    case 37:  // Arrow left
-      objects[0].left = false;
+    case 37:  // <-
+      cannons[cannon].left = false;
       break;
-    case 38:  // Arrow up
-      objects[0].front = false;
-      break;
-    case 39:  // Arrow right
-      objects[0].right = false;
-      break;
-    case 40:  // Arrow down
-      objects[0].back = false;
-      break;
-    case 87:  // W
-      objects[0].armFront = false;
-      break;
-    case 81:  // Q
-      objects[0].armBack = false;
-      break;
-    case 65:  // A
-      objects[0].armLeft = false;
-      break;
-    case 83:  // S
-      objects[0].armRight = false;
+    case 39:  // ->
+      cannons[cannon].right = false;
       break;
   }
 }
@@ -158,37 +154,35 @@ function onKeyUp(e) {
 function animate() {
   'use strict';
 
-  // Move back
-  if (objects[0].back) {
-    objects[0].moveX(-0.2);
+  var newTime = new Date();
+  var elapsed = (newTime - time) / 1000;
+  time = newTime;
+
+  if (cannon == 0) {
+    cannons[0].setColor(new THREE.Color(0x00ff00));
+    cannons[1].setColor(new THREE.Color(0xff0000));
+    cannons[2].setColor(new THREE.Color(0xff0000));
+  } else if (cannon == 1) {
+    cannons[1].setColor(new THREE.Color(0x00ff00));
+    cannons[0].setColor(new THREE.Color(0xff0000));
+    cannons[2].setColor(new THREE.Color(0xff0000));
+  } else if (cannon == 2) {
+    cannons[2].setColor(new THREE.Color(0x00ff00));
+    cannons[0].setColor(new THREE.Color(0xff0000));
+    cannons[1].setColor(new THREE.Color(0xff0000));
   }
-  // Move left
-  if (objects[0].left) {
-    objects[0].moveZ(-0.2);
+
+  if (camera == 0) {
+    cameras[0].lookAt(scene.position);
+  } else if (camera == 1) {
+    cameras[1].lookAt(scene.position);
   }
-  // Move front
-  if (objects[0].front) {
-    objects[0].moveX(0.2);
+
+  if (cannons[cannon].left) {
+    cannons[cannon].rotate(rotV * elapsed);
   }
-  // Move right
-  if (objects[0].right) {
-    objects[0].moveZ(0.2);
-  }
-  // Arm front
-  if (objects[0].armFront) {
-    objects[0].rotateZ(-0.01);
-  }
-  // Arm back
-  if (objects[0].armBack) {
-    objects[0].rotateZ(0.01);
-  }
-  // Arm left
-  if (objects[0].armLeft) {
-    objects[0].rotateY(0.01);
-  }
-  // Arm right
-  if (objects[0].armRight) {
-    objects[0].rotateY(-0.01);
+  if (cannons[cannon].right) {
+    cannons[cannon].rotate(-rotV * elapsed);
   }
 
   render();
@@ -207,8 +201,6 @@ function init() {
 
   createScene();
   createCamera();
-
-  render();
 
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
