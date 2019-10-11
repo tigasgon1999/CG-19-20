@@ -167,7 +167,7 @@ class Car extends Object3D {
       v1.y = 1.5 * this.k;
       v1.z = 0.5 * this.k;
       this.arm.forearm.finger.localToWorld(v1);
-      if (v1.y < 0.5) {
+      if (v1.y < 1) {
         return false;
       }
       return true;
@@ -176,7 +176,6 @@ class Car extends Object3D {
       v2.y = -8 * this.k;
       v2.x = -1 * this.k;
       this.arm.pipe.localToWorld(v2);
-      console.log(v2.y);
       if (v2.y < (5 * this.k) + (0.5 * this.k)) {
         return false;
       }

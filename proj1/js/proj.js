@@ -26,15 +26,15 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  var car = new Car(0, 0, 0, k);
+  var car = new Car(-20, 0, 0, k);
   objects.push(car);
   scene.add(car);
 
-  var stand = new Stand(40, 0, 0);
+  var stand = new Stand(20, 0, 0);
   objects.push(stand);
   scene.add(stand);
 
-  var target = new Target(40, 30, 0);
+  var target = new Target(20, 30, 0);
   objects.push(target);
   scene.add(target);
 }
