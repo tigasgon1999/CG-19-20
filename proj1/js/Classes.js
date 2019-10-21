@@ -22,12 +22,23 @@ class Forearm extends Object3D {
           {color: 0xffff00, wireframe: true, side: THREE.DoubleSide})
     };
 
+    this.sphereR = 2 * k;
+    this.armL = 16 * k;
+    this.handW = 8 * k;
+    this.handL = 1.5 * k;
+    this.fingerL = 4 * k;
+    this.fingerW = k;
+
     this.addSphere(0, 0, 0, k);
-    this.addParallelepiped(0, (10 * k), 0, k);
-    this.addSphere(0, (20 * k), 0, k);
-    this.addHand(0, (22.75 * k), 0, k);
-    this.addFinger(-(3.5 * k), (25.5 * k), 0, k);
-    this.finger = this.addFinger((3.5 * k), (25.5 * k), 0, k);
+    this.addParallelepiped(0, this.sphereR + this.armL / 2, 0, k);
+    this.addSphere(0, 2 * this.sphereR + this.armL, 0, k);
+    this.addHand(0, 3 * this.sphereR + this.armL + this.handL / 2, 0, k);
+    this.addFinger(
+        -(this.handW / 2 - this.fingerW / 2),
+        3 * this.sphereR + this.armL + this.handL + this.fingerL / 2, 0, k);
+    this.finger = this.addFinger(
+        this.handW / 2 - this.fingerW / 2,
+        3 * this.sphereR + this.armL + this.handL + this.fingerL / 2, 0, k);
   }
 
   toggleWireframe() {
@@ -45,7 +56,7 @@ class Forearm extends Object3D {
   addSphere(x, y, z, k) {
     'use strict';
 
-    var geometry = new THREE.SphereGeometry((2 * k), (20 * k), (20 * k));
+    var geometry = new THREE.SphereGeometry(this.sphereR, (20 * k), (20 * k));
     var mesh = new THREE.Mesh(geometry, this.materials.sphere);
     mesh.position.set(x, y, z);
 
@@ -55,7 +66,7 @@ class Forearm extends Object3D {
   addParallelepiped(x, y, z, k) {
     'use strict';
 
-    var geometry = new THREE.CubeGeometry((2 * k), (16 * k), (2 * k));
+    var geometry = new THREE.CubeGeometry((2 * k), this.armL, (2 * k));
     var mesh = new THREE.Mesh(geometry, this.materials.cube);
     mesh.position.set(x, y, z);
 
@@ -65,7 +76,7 @@ class Forearm extends Object3D {
   addHand(x, y, z, k) {
     'use strict'
 
-    var geometry = new THREE.CubeGeometry((8 * k), (1.5 * k), (1 * k));
+    var geometry = new THREE.CubeGeometry(this.handW, this.handL, (1 * k));
     var mesh = new THREE.Mesh(geometry, this.materials.hand);
     mesh.position.set(x, y, z);
 
@@ -75,7 +86,7 @@ class Forearm extends Object3D {
   addFinger(x, y, z, k) {
     'use strict'
 
-    var geometry = new THREE.CubeGeometry((1 * k), (4 * k), (1 * k));
+    var geometry = new THREE.CubeGeometry((1 * k), this.fingerL, (1 * k));
     var mesh = new THREE.Mesh(geometry, this.materials.hand);
     mesh.position.set(x, y, z);
 
@@ -86,15 +97,17 @@ class Forearm extends Object3D {
 }
 
 class Arm extends Object3D {
-  constructor(x, y, z, k) {
+  constructor(x, y, z, k, r) {
     'use strict';
     super(x, y, z);
+
+    this.armL = 16 * k;
 
     this.material = new THREE.MeshBasicMaterial(
         {color: 0x0000ff, wireframe: true, side: THREE.DoubleSide});
 
-    this.addParallelepiped(0, 10.5 * k, 0, k);
-    this.addForearm(0, 20.5 * k, 0, k);
+    this.addParallelepiped(0, r + (this.armL / 2), 0, k);
+    this.addForearm(0, r + this.armL, 0, k);
     this.forearm.rotateZ(-Math.PI / 2);
   }
 
@@ -117,7 +130,7 @@ class Arm extends Object3D {
   addParallelepiped(x, y, z, k) {
     'use strict';
 
-    var geometry = new THREE.CubeGeometry(2 * k, 16 * k, 2 * k);
+    var geometry = new THREE.CubeGeometry(2 * k, this.armL, 2 * k);
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
     this.pipe = mesh;
@@ -139,6 +152,9 @@ class Car extends Object3D {
     super(x, y, z);
 
     this.k = k;
+    this.table = {l: 15 * k, w: 15 * k, h: k};
+    this.wheelR = 2 * k;
+    this.cap = 2.5 * k;
 
     this.materials = {
       car: new THREE.MeshBasicMaterial(
@@ -150,13 +166,13 @@ class Car extends Object3D {
           {color: 0xff0000, wireframe: true, side: THREE.DoubleSide})
     };
 
-    this.addTableTop(0, 4.5 * k, 0, k);
-    this.addWheel((-20) * k, 2 * k, (-7.5) * k, k);
-    this.addWheel((-20) * k, 2 * k, (7.5) * k, k);
-    this.addWheel((20) * k, 2 * k, (-7.5) * k, k);
-    this.addWheel((20) * k, 2 * k, (7.5) * k, k);
-    this.addSphericalCap(0, 5 * k, 0, k);
-    this.addArm(0, 5 * k, 0, k);
+    this.addTableTop(0, (2 * this.wheelR + this.table.h / 2), 0, k);
+    this.addWheel(-(this.table.l) / 2, this.wheelR, -(this.table.w) / 2, k);
+    this.addWheel(-(this.table.l) / 2, this.wheelR, (this.table.w) / 2, k);
+    this.addWheel((this.table.l) / 2, this.wheelR, -(this.table.w) / 2, k);
+    this.addWheel((this.table.l) / 2, this.wheelR, (this.table.w) / 2, k);
+    this.addSphericalCap(0, this.table.h + 2 * this.wheelR, 0, k);
+    this.addArm(0, this.table.h + 2 * this.wheelR, 0, k, this.cap);
   }
 
   checkRotation(delta) {
@@ -220,7 +236,7 @@ class Car extends Object3D {
     'use strict';
 
     var geometry = new THREE.SphereGeometry(
-        (2.5 * k), 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
+        this.cap, 20, 20, 0, 6.3, 0, 0.5 * Math.PI);  // Semisphere
     var mesh = new THREE.Mesh(geometry, this.materials.sphere);
     mesh.position.set(x, y, z);
     this.sphericalCap = mesh;
@@ -228,9 +244,9 @@ class Car extends Object3D {
     this.add(mesh);
   }
 
-  addArm(x, y, z, k) {
+  addArm(x, y, z, k, r) {
     'use strict';
-    var arm = new Arm(x, y, z, k);
+    var arm = new Arm(x, y, z, k, r);
     this.arm = arm;
     this.add(arm);
   }
@@ -238,7 +254,8 @@ class Car extends Object3D {
   addTableTop(x, y, z, k) {
     'use strict';
 
-    var geometry = new THREE.CubeGeometry((40 * k), (1 * k), (15 * k));
+    var geometry =
+        new THREE.CubeGeometry(this.table.l, this.table.h, this.table.w);
     var mesh = new THREE.Mesh(geometry, this.materials.car);
     mesh.position.set(x, y, z);
 
@@ -248,7 +265,7 @@ class Car extends Object3D {
   addWheel(x, y, z, k) {
     'use strict';
 
-    var geometry = new THREE.SphereGeometry(2 * k, 15 * k, 15 * k);
+    var geometry = new THREE.SphereGeometry(this.wheelR, 15 * k, 15 * k);
     var mesh = new THREE.Mesh(geometry, this.materials.wheel);
     mesh.position.set(x, y, z);
 

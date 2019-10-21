@@ -11,7 +11,9 @@ var rotV = 0.5;
 var time = new Date();
 var h = 30;  // Height of walls
 var r = 2;   // Radius of balls
-var N = 7;   // Number of balls
+var N = 0;   // Number of balls
+var v = 80;
+const a = -20;
 
 function createCamera() {
   'use strict';
@@ -49,6 +51,9 @@ function createScene() {
   var wall3 = new Wall(-1.5 * h, 0, 1.5 * h, h, Math.PI / 2);
   walls.push(wall3);
   scene.add(wall3);
+
+  var a = new THREE.AxesHelper(10);
+  scene.add(a);
 
   for (var i = 0; i < N; i++) {
     var valid = false;
@@ -135,6 +140,8 @@ function onKeyDown(e) {
     case 39:  // ->
       cannons[cannon].right = true;
       break;
+    case 32:  // Space
+      cannons[cannon].fire = true;
   }
 }
 
@@ -183,6 +190,23 @@ function animate() {
   }
   if (cannons[cannon].right) {
     cannons[cannon].rotate(-rotV * elapsed);
+  }
+
+  if (cannons[cannon].fire) {
+    cannons[cannon].fire = false;
+    cannons[cannon].fireBall(r, v);
+  }
+
+  for (var i = 0; i < balls.length; i++) {
+    balls[i].move(elapsed);
+  }
+
+  for (var j = 0; j < walls.length; j++) {
+    for (var k = 0; k < balls.length; k++) {
+      if (walls[j].ballHit(balls[k])) {
+        balls[k].v = 0;
+      }
+    }
   }
 
   render();
