@@ -11,20 +11,12 @@ var rotV = 0.5;
 var time = new Date();
 var h = 30;  // Height of walls
 var r = 2;   // Radius of balls
-var N = 0;   // Number of balls
+var N = 2;   // Number of balls
 var v = 80;
 const a = -20;
 
 function createCamera() {
   'use strict';
-
-  var cameraP = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraP.position.x = 60;
-  cameraP.position.y = 120;
-  cameraP.position.z = 100;
-  cameras.push(cameraP)
-  cameraP.lookAt(scene.position);
 
   var cameraO = new THREE.OrthographicCamera(
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
@@ -32,6 +24,22 @@ function createCamera() {
 
   cameraO.position.y = 1000;
   cameras.push(cameraO);
+
+  var cameraP = new THREE.PerspectiveCamera(
+      50, window.innerWidth / window.innerHeight, 1, 1000);
+  cameraP.position.x = 60;
+  cameraP.position.y = 120;
+  cameraP.position.z = 100;
+  cameras.push(cameraP);
+  cameraP.lookAt(scene.position);
+
+  var cameraP2 = new THREE.PerspectiveCamera(
+    50, window.innerWidth / window.innerHeight, 1, 500);
+  cameraP2.position.x = 20;
+  cameraP2.position.y = 30;
+  cameraP2.position.z = 20;
+  cameras.push(cameraP2);
+  cameraP2.lookAt(scene.position);
 }
 
 function createScene() {
@@ -125,6 +133,9 @@ function onKeyDown(e) {
     case 50:  // 2
       camera = 1;
       break;
+    case 51:  // 3
+      camera = 2;
+      break;
     case 81:  // q
       cannon = 0;
       break;
@@ -183,6 +194,11 @@ function animate() {
     cameras[0].lookAt(scene.position);
   } else if (camera == 1) {
     cameras[1].lookAt(scene.position);
+  } else if (camera == 2) {
+    var currentBall = balls[balls.length-1]
+    cameras[2].lookAt(currentBall.position);
+    cameras[2].position.x = currentBall.position.x + 20;
+    cameras[2].position.z = currentBall.position.z;
   }
 
   if (cannons[cannon].left) {
