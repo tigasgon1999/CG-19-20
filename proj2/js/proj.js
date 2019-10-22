@@ -33,13 +33,13 @@ function createCamera() {
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 
-  var cameraP2 = new THREE.PerspectiveCamera(
-    50, window.innerWidth / window.innerHeight, 1, 500);
-  cameraP2.position.x = 20;
-  cameraP2.position.y = 30;
-  cameraP2.position.z = 20;
-  cameras.push(cameraP2);
-  cameraP2.lookAt(scene.position);
+  // var cameraP2 = new THREE.PerspectiveCamera(
+  //   50, window.innerWidth / window.innerHeight, 1, 1000);
+  // cameraP2.position.x = 20;
+  // cameraP2.position.y = 30;
+  // cameraP2.position.z = 20;
+  // cameras.push(cameraP2);
+  // cameraP2.lookAt(scene.position);
 }
 
 function createScene() {
@@ -196,9 +196,11 @@ function animate() {
     cameras[1].lookAt(scene.position);
   } else if (camera == 2) {
     var currentBall = balls[balls.length-1]
+    currentBall.updateCamera();
     cameras[2].lookAt(currentBall.position);
-    cameras[2].position.x = currentBall.position.x + 20;
-    cameras[2].position.z = currentBall.position.z;
+    // cameras[2].position.x = currentBall.position.x + 30;
+    // cameras[2].position.z = currentBall.position.z;
+
   }
 
   if (cannons[cannon].left) {
@@ -241,6 +243,7 @@ function init() {
 
   createScene();
   createCamera();
+  balls[balls.length-1].addCamera();
 
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);

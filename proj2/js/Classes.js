@@ -76,6 +76,8 @@ class Ball extends Object3d {
     this.v = v;
     this.r = r;
     this.dir = dir;
+    this.camera = new THREE.PerspectiveCamera(
+        50, window.innerWidth / window.innerHeight, 1, 1000);
 
     this.material = new THREE.MeshBasicMaterial(
         {color: getRandomColor(), side: THREE.DoubleSide, wireframe: false});
@@ -91,6 +93,16 @@ class Ball extends Object3d {
     mesh.position.set(x, y, z);
 
     this.add(mesh);
+  }
+  addCamera() {
+    cameras.push(this.camera);
+    this.camera.lookAt(this.position);
+  } 
+
+  updateCamera() {
+    this.camera.position.x = this.position.x + 30*r;
+    this.camera.position.y = 30;
+    this.camera.position.z = this.position.z;
   }
 
   isCoincident(b) {
@@ -206,6 +218,8 @@ class Cannon extends Object3d {
   }
 
   fireBall(r, v) {
+    cameras.pop();
+
     var pos = new THREE.Vector3(this.cannonL / 2, 0, 0);
     var centre = new THREE.Vector3();
     this.localToWorld(pos);
@@ -215,6 +229,7 @@ class Cannon extends Object3d {
     var b = new Ball(pos.x, r, pos.z, r, v, dir);
     scene.add(b);
     balls.push(b);
+    b.addCamera();
   }
 }
 
