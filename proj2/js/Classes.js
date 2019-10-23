@@ -57,6 +57,8 @@ class Ball extends Object3d {
     this.v = v;
     this.r = r;
     this.dir = dir.normalize();
+    this.camera = new THREE.PerspectiveCamera(
+        50, window.innerWidth / window.innerHeight, 1, 1000);
 
     this.material = new THREE.MeshBasicMaterial(
         {color: getRandomColor(), side: THREE.DoubleSide, wireframe: false});
@@ -72,6 +74,19 @@ class Ball extends Object3d {
     mesh.position.set(x, y, z);
 
     this.add(mesh);
+  }
+  addCamera() {
+    this.camera.position.x = this.position.x + 30 * this.r;
+    this.camera.position.y = 30;
+    this.camera.position.z = this.position.z;
+    cameras.push(this.camera);
+    this.camera.lookAt(this.position);
+  }
+
+  updateCamera() {
+    this.camera.position.x = this.position.x - this.dir.x * 30;
+    this.camera.position.y = 30;
+    this.camera.position.z = this.position.z - this.dir.z * 30;
   }
 
   isCoincident(b) {
@@ -137,9 +152,11 @@ class Ball extends Object3d {
   }
 
   update(delta) {
+    var dx = 0
+    var dz = 0
     if (this.v > 0) {
-      var dx = this.dir.x * this.v * delta;
-      var dz = this.dir.z * this.v * delta;
+      dx = this.dir.x * this.v * delta;
+      dz = this.dir.z * this.v * delta;
       this.v += a * delta;
 
       if (this.position.x + dx - this.r < minX + 2) {
@@ -152,11 +169,13 @@ class Ball extends Object3d {
 
       this.translateX(dx);
       this.translateZ(dz);
-
-    } else {
+    }
+    else {
       this.v = 0;
       this.dir = new THREE.Vector3();
     }
+
+    this.updateCamera(dx, dz)
   }
 
   move(delta) {
@@ -285,6 +304,8 @@ class Cannon extends Object3d {
   }
 
   fireBall(r, v) {
+    cameras.pop();
+
     var pos = new THREE.Vector3(this.cannonL / 2, 0, 0);
     var centre = new THREE.Vector3();
     this.localToWorld(pos);
@@ -294,6 +315,7 @@ class Cannon extends Object3d {
     var b = new Ball(pos.x, r, pos.z, r, v, dir);
     scene.add(b);
     balls.push(b);
+    b.addCamera();
   }
 }
 

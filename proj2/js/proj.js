@@ -21,20 +21,20 @@ const maxZ = -minZ;
 function createCamera() {
   'use strict';
 
-  var cameraP = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraP.position.x = 60;
-  cameraP.position.y = 120;
-  cameraP.position.z = 100;
-  cameras.push(cameraP)
-  cameraP.lookAt(scene.position);
-
   var cameraO = new THREE.OrthographicCamera(
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
       window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1000);
 
   cameraO.position.y = 1000;
   cameras.push(cameraO);
+
+  var cameraP = new THREE.PerspectiveCamera(
+      50, window.innerWidth / window.innerHeight, 1, 1000);
+  cameraP.position.x = 60;
+  cameraP.position.y = 120;
+  cameraP.position.z = 100;
+  cameras.push(cameraP);
+  cameraP.lookAt(scene.position);
 }
 
 function createScene() {
@@ -129,6 +129,9 @@ function onKeyDown(e) {
     case 50:  // 2
       camera = 1;
       break;
+    case 51:  // 3
+      camera = 2;
+      break;
     case 81:  // q
       cannon = 0;
       break;
@@ -187,6 +190,11 @@ function animate() {
     cameras[0].lookAt(scene.position);
   } else if (camera == 1) {
     cameras[1].lookAt(scene.position);
+  } else if (camera == 2) {
+    var currentBall = balls[balls.length - 1]
+    cameras[2].lookAt(currentBall.position);
+    // cameras[2].position.x = currentBall.position.x + 30;
+    // cameras[2].position.z = currentBall.position.z;
   }
 
   if (cannons[cannon].left) {
@@ -227,6 +235,7 @@ function init() {
 
   createScene();
   createCamera();
+  balls[balls.length - 1].addCamera();
 
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
