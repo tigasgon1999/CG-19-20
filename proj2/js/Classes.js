@@ -64,6 +64,7 @@ class Ball extends Object3d {
         {color: getRandomColor(), side: THREE.DoubleSide, wireframe: false});
 
     this.addBall(0, r, 0, r);
+    this.add(new THREE.AxesHelper(this.r));
   }
 
   addBall(x, y, z, r) {
