@@ -45,25 +45,6 @@ class Wall extends Object3d {
 
     this.add(mesh);
   }
-
-  ballHit(b) {
-    var ball = new THREE.Vector3();
-    b.localToWorld(ball);
-    this.worldToLocal(ball);
-
-    var centre =
-        new THREE.Vector3(this.position.x, this.position.y, this.position.z);
-
-    centre.normalize();
-
-    var bound = new THREE.Vector3(this.bound, 0, 0);
-    bound.applyAxisAngle(centre, this.theta);
-    ball.applyAxisAngle(centre, this.theta);
-
-    var dx = ball.x - bound.x;
-
-    return dx <= b.bound + this.bound;
-  }
 }
 
 class Ball extends Object3d {
@@ -71,11 +52,11 @@ class Ball extends Object3d {
     'use strict';
 
     super(x, y, z);
-    this.bound = 1.1 * r;
+    this.bound = 1.25 * r;
 
     this.v = v;
     this.r = r;
-    this.dir = dir;
+    this.dir = dir.normalize();
 
     this.material = new THREE.MeshBasicMaterial(
         {color: getRandomColor(), side: THREE.DoubleSide, wireframe: false});
@@ -94,20 +75,118 @@ class Ball extends Object3d {
   }
 
   isCoincident(b) {
-    var xlen = this.position.x - b.position.x;
-    var ylen = this.position.y - b.position.y;
-    var zlen = this.position.z - b.position.z;
-    var d = Math.sqrt(xlen * xlen + ylen * ylen + zlen * zlen);
-    return d <= b.bound + this.bound;
+    var n = new THREE.Vector3();  // Normal vector between two centres
+    n.subVectors(this.position, b.position);
+    if (n.length() <= b.bound + this.bound) {
+      // 1: Find n and t vectors
+      var n = new THREE.Vector3();  // Normal vector between two centres
+      n.subVectors(this.position, b.position);
+      n.normalize();
+      var t = new THREE.Vector3(-n.z, n.y, n.x);
+
+      // 2: find v1 and v2 as vectors
+      var v1 = new THREE.Vector3(
+          this.dir.x * this.v, this.dir.y * this.v, this.dir.z * this.v)
+      var v2 = new THREE.Vector3(b.dir.x * b.v, b.dir.y * b.v, b.dir.z * b.v)
+
+      // 3: Project v1 and v2 in n(v1n, v2n) and t(v1t, v2t)
+      var v1n = n.dot(v1);
+      var v1t = t.dot(v1);
+      var v2n = n.dot(v2);
+      var v2t = t.dot(v2);
+
+      // 4: Find v1t' and v2t'
+      var v1tt = v1t;
+      var v2tt = v2t;
+
+      // 5: Find v1n' and v2n'
+      var v1nn = v2n;
+      var v2nn = v1n;
+
+      // 6: find v1n, v2n, v1t and v2t as vectors
+
+      var vecv1n = new THREE.Vector3(v1nn * n.x, v1nn * n.y, v1nn * n.z);
+      var vecv1t = new THREE.Vector3(v1tt * t.x, v1tt * t.y, v1tt * t.z);
+      var vecv2n = new THREE.Vector3(v2nn * n.x, v2nn * n.y, v2nn * n.z);
+      var vecv2t = new THREE.Vector3(v2tt * t.x, v2tt * t.y, v2tt * t.z);
+
+      // 7: find final v1 and v2
+
+      vecv1n.add(vecv1t);
+      vecv2n.add(vecv2t);
+
+      // 8: get v1f and v2f as scalars
+      var v1f = vecv1n.length();
+      var v2f = vecv2n.length();
+
+      // 9: get normalized directions
+      vecv1n.normalize();
+      vecv2n.normalize();
+
+      // 10: add everything up
+
+      this.v = v1f;
+      this.dir.copy(vecv1n);
+
+      b.v = v2f;
+      b.dir.copy(vecv2n);
+
+      return true;
+    }
+    return false;
+  }
+
+  update(delta) {
+    if (this.v > 0) {
+      var dx = this.dir.x * this.v * delta;
+      var dz = this.dir.z * this.v * delta;
+      this.v += a * delta;
+
+      if (this.position.x + dx - this.r < minX + 2) {
+        this.dir.x *= -1;
+      }
+      if (this.position.z + dz - this.r < minZ + 2 ||
+          this.position.z + dz + this.r > maxZ - 2) {
+        this.dir.z *= -1;
+      }
+
+      this.translateX(dx);
+      this.translateZ(dz);
+
+    } else {
+      this.v = 0;
+      this.dir = new THREE.Vector3();
+    }
   }
 
   move(delta) {
+    if (this.wallz) {
+      this.wallz = false;
+      this.dir.set(this.dir.x, this.dir.y, -this.dir.z);
+    }
+    if (this.wallx) {
+      this.wallx = false;
+      this.dir.set(-this.dir.x, this.dir.y, this.dir.z);
+    }
     if (this.v > 0) {
       this.translateX(this.dir.x * this.v * delta);
       this.translateZ(this.dir.z * this.v * delta);
       this.v += a * delta;
     } else {
       this.v = 0;
+    }
+  }
+
+  isHittingWall(w) {
+    var centre = new THREE.Vector3();
+    this.localToWorld(centre);
+
+    if (centre.x - this.r < minX + w.bound) {
+      this.wallx = true;
+    }
+    if (centre.z - this.r < minZ + w.bound ||
+        centre.z + this.r > maxZ - w.bound) {
+      this.wallz = true;
     }
   }
 }

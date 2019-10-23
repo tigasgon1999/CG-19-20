@@ -11,9 +11,12 @@ var rotV = 0.5;
 var time = new Date();
 var h = 30;  // Height of walls
 var r = 2;   // Radius of balls
-var N = 0;   // Number of balls
-var v = 80;
-const a = -20;
+var N = 2;   // Number of balls
+var v = 150;
+const a = -40;
+const minX = -3 * h;
+const minZ = minX / 2;
+const maxZ = -minZ;
 
 function createCamera() {
   'use strict';
@@ -38,17 +41,18 @@ function createScene() {
   'use strict';
 
   scene = new THREE.Scene();
+  var nulldir = new THREE.Vector3();
 
 
-  var wall1 = new Wall(-3 * h, 0, 0, h, 0);
+  var wall1 = new Wall(minX, 0, 0, h, 0);
   walls.push(wall1);
   scene.add(wall1);
 
-  var wall2 = new Wall(-1.5 * h, 0, -1.5 * h, h, Math.PI / 2);
+  var wall2 = new Wall(minX / 2, 0, minZ, h, Math.PI / 2);
   walls.push(wall2);
   scene.add(wall2);
 
-  var wall3 = new Wall(-1.5 * h, 0, 1.5 * h, h, Math.PI / 2);
+  var wall3 = new Wall(minX / 2, 0, maxZ, h, Math.PI / 2);
   walls.push(wall3);
   scene.add(wall3);
 
@@ -57,7 +61,7 @@ function createScene() {
 
   for (var i = 0; i < N; i++) {
     var valid = false;
-    var ball = new Ball(0, 0, 0, r, 0);
+    var ball = new Ball(0, 0, 0, r, 0, nulldir);
     while (!valid) {
       valid = true;
       var randx = -3 * h + (Math.random() * 1.5 * h) + 2 * r;
@@ -197,16 +201,14 @@ function animate() {
     cannons[cannon].fireBall(r, v);
   }
 
-  for (var i = 0; i < balls.length; i++) {
-    balls[i].move(elapsed);
+  for (var i = 0; i < balls.length - 1; i++) {
+    for (var j = i + 1; j < balls.length; j++) {
+      balls[i].isCoincident(balls[j]);
+    }
   }
 
-  for (var j = 0; j < walls.length; j++) {
-    for (var k = 0; k < balls.length; k++) {
-      if (walls[j].ballHit(balls[k])) {
-        balls[k].v = 0;
-      }
-    }
+  for (var i = 0; i < balls.length; i++) {
+    balls[i].update(elapsed);
   }
 
   render();
