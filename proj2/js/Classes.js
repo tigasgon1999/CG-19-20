@@ -19,7 +19,6 @@ class Wall extends Object3d {
     this.wallH = h;
     this.theta = theta;
     this.wallW = 2;
-    this.bound = 1.1 * this.wallW;
 
     this.material = new THREE.MeshBasicMaterial({
       color: 0xa9a9a9,
@@ -27,18 +26,14 @@ class Wall extends Object3d {
       side: THREE.DoubleSide,
     });
 
-    var a = new THREE.AxesHelper(10);
-    this.add(a);
-
-    this.addWall(0, this.wallH / 2, 0);
+    this.addWall(0, 1.5 * r, 0);
   }
 
   addWall(x, y, z) {
     'use strict';
 
 
-    var geometry =
-        new THREE.CubeGeometry(this.wallW, this.wallH, 3 * this.wallH);
+    var geometry = new THREE.CubeGeometry(this.wallW, 3 * r, 3 * this.wallH);
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
     mesh.rotation.y = this.theta;
@@ -51,7 +46,7 @@ class Ball extends Object3d {
   constructor(x, y, z, r, v, dir) {
     'use strict';
 
-    super(x, y, z);
+    super(x, y + r, z);
     this.bound = 1.25 * r;
 
     this.v = v;
@@ -61,21 +56,26 @@ class Ball extends Object3d {
         50, window.innerWidth / window.innerHeight, 1, 1000);
 
     this.material = new THREE.MeshBasicMaterial(
-        {color: getRandomColor(), side: THREE.DoubleSide, wireframe: false});
+        {color: getRandomColor(), side: THREE.DoubleSide, wireframe: true});
 
-    this.addBall(0, r, 0, r);
-    this.add(new THREE.AxesHelper(this.r));
+    this.addBall(0, 0, 0, r);
+    this.axis = new THREE.AxesHelper(this.r * 2);
+    this.axis.position.set(0, 0, 0);
+    this.axis.visible = currentAxis;
+    this.add(this.axis);
   }
 
   addBall(x, y, z, r) {
     'use strict';
 
-    var geometry = new THREE.SphereGeometry(r, 15, 15);
+    var geometry = new THREE.SphereGeometry(r, 8, 8);
+    geometry.center(this.position)
     var mesh = new THREE.Mesh(geometry, this.material);
     mesh.position.set(x, y, z);
 
     this.add(mesh);
   }
+
   addCamera() {
     this.camera.position.x = this.position.x + 30 * this.r;
     this.camera.position.y = 30;
@@ -90,8 +90,26 @@ class Ball extends Object3d {
     this.camera.position.z = this.position.z - this.dir.z * 30;
   }
 
-  isCoincident(b) {
-    var n = new THREE.Vector3();  // Normal vector between two centres
+  checkWallCollisions() {
+    if (this.position.x > 0) {
+      this.falling = true;
+      return
+    }
+
+    var ballMinX = this.position.x - this.bound;
+    var ballMinZ = this.position.z - this.bound;
+    var ballMaxZ = this.position.z + this.bound;
+
+    if (ballMinX <= minX + wallBound) {
+      this.dir.x *= -1;
+    }
+    if (ballMinZ <= minZ + wallBound || ballMaxZ >= maxZ - wallBound) {
+      this.dir.z *= -1;
+    }
+  }
+
+  checkBallCollision(b) {
+    var n = new THREE.Vector3();
     n.subVectors(this.position, b.position);
     if (n.length() <= b.bound + this.bound) {
       // 1: Find n and t vectors
@@ -146,68 +164,96 @@ class Ball extends Object3d {
 
       b.v = v2f;
       b.dir.copy(vecv2n);
-
-      return true;
     }
-    return false;
   }
 
-  update(delta) {
+  getDistance(b) {
+    return Math.sqrt(
+        ((this.position.x - b.position.x) ** 2) +
+        ((this.position.y - b.position.y) ** 2) +
+        ((this.position.z - b.position.z) ** 2))
+  }
+
+  isCoincident(b) {
+    return this.getDistance(b) <= this.bound + b.bound;
+  }
+
+  move(dx, dz) {
+    this.matrix.identity();
+    var m_trans = new THREE.Matrix4();
+    var m_rot = new THREE.Matrix4();
+    var axis = new THREE.Vector3(-this.dir.z, 0, this.dir.x);
+    var rad = Math.sqrt(dz ** 2 + dx ** 2) / this.r;
+    m_trans.makeTranslation(dx, 0, dz);
+    m_rot.makeRotationAxis(axis.normalize(), rad);
+    this.applyMatrix(m_trans);
+    this.matrix.multiply(m_rot);
+    this.rotation.setFromRotationMatrix(this.matrix);
+  }
+
+  update(delta, self) {
     var dx = 0
     var dz = 0
     if (this.v > 0) {
       dx = this.dir.x * this.v * delta;
       dz = this.dir.z * this.v * delta;
+      var moveVector = new THREE.Vector3(dx, 0, dz);
+      moveVector = this.localToWorld(moveVector);
       this.v += a * delta;
 
-      if (this.position.x + dx - this.r < minX + 2) {
-        this.dir.x *= -1;
-      }
-      if (this.position.z + dz - this.r < minZ + 2 ||
-          this.position.z + dz + this.r > maxZ - 2) {
-        this.dir.z *= -1;
+      // Test Balls
+
+      for (var i = 0; i < balls.length; i++) {
+        if (self != i) {
+          var d = this.getDistance(balls[i]);
+          var diff = d - (this.bound + balls[i].bound);
+          if (diff < 0) {  // Overlap detected
+            dx -= diff * this.dir.x;
+            dz -= diff * this.dir.z;
+          }
+        }
       }
 
-      this.translateX(dx);
-      this.translateZ(dz);
+      // Test Walls
+
+      var xLimit = this.position.x + dx - this.bound;  // Wall has x < 0
+      var zUpper = this.position.z + dz + this.bound;  // Wall has z > 0
+      var zLower = this.position.z + dz - this.bound;  // Wall has z < 0
+
+      var diffX = minX + wallBound - xLimit;
+      var diffZUp = maxZ - wallBound - zUpper;
+      var diffZLow = minZ + wallBound - zLower;
+
+      if (diffX > 0) {
+        dx += diffX
+      }
+
+      if (diffZUp < 0) {
+        dz += diffZUp;
+      }
+
+      if (diffZLow > 0) {
+        dz += diffZLow;
+      }
+
+
+      this.move(dx, dz);
     }
     else {
       this.v = 0;
       this.dir = new THREE.Vector3();
     }
 
+    if (this.falling) {
+      var m = new THREE.Matrix4();
+      m.makeTranslation(0, -5, 0);
+      this.applyMatrix(m);
+    }
     this.updateCamera(dx, dz)
   }
 
-  move(delta) {
-    if (this.wallz) {
-      this.wallz = false;
-      this.dir.set(this.dir.x, this.dir.y, -this.dir.z);
-    }
-    if (this.wallx) {
-      this.wallx = false;
-      this.dir.set(-this.dir.x, this.dir.y, this.dir.z);
-    }
-    if (this.v > 0) {
-      this.translateX(this.dir.x * this.v * delta);
-      this.translateZ(this.dir.z * this.v * delta);
-      this.v += a * delta;
-    } else {
-      this.v = 0;
-    }
-  }
-
-  isHittingWall(w) {
-    var centre = new THREE.Vector3();
-    this.localToWorld(centre);
-
-    if (centre.x - this.r < minX + w.bound) {
-      this.wallx = true;
-    }
-    if (centre.z - this.r < minZ + w.bound ||
-        centre.z + this.r > maxZ - w.bound) {
-      this.wallz = true;
-    }
+  toggleAxis() {
+    this.axis.visible = currentAxis;
   }
 }
 
@@ -253,7 +299,10 @@ class Cannon extends Object3d {
   }
 
   rotate(delta) {
-    this.rotation.y += delta;
+    var m = new THREE.Matrix4();
+    m.makeRotationAxis(new THREE.Vector3(0, 1, 0), delta);
+    this.matrix.multiply(m);
+    this.rotation.setFromRotationMatrix(this.matrix);
   }
 
   setColor(c) {
@@ -313,7 +362,8 @@ class Cannon extends Object3d {
     this.localToWorld(centre);
     var dir = new THREE.Vector3();
     dir.subVectors(pos, centre).normalize();
-    var b = new Ball(pos.x, r, pos.z, r, v, dir);
+    var vel = min_v + v * Math.random();
+    var b = new Ball(pos.x, r, pos.z, r, vel, dir);
     scene.add(b);
     balls.push(b);
     b.addCamera();
