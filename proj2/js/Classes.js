@@ -61,10 +61,10 @@ class Ball extends Object3d {
         50, window.innerWidth / window.innerHeight, 1, 1000);
 
     this.material = new THREE.MeshBasicMaterial(
-        {color: getRandomColor(), side: THREE.DoubleSide, wireframe: false});
+        {color: getRandomColor(), wireframe: true, side: THREE.DoubleSide});
 
     this.addBall(0, r, 0, r);
-    this.add(new THREE.AxesHelper(this.r));
+    this.add(new THREE.AxesHelper(this.r * 2));
   }
 
   addBall(x, y, z, r) {
@@ -168,8 +168,13 @@ class Ball extends Object3d {
         this.dir.z *= -1;
       }
 
-      this.translateX(dx);
-      this.translateZ(dz);
+      var d = Math.sqrt((dx**2) + (dz**2));
+      var angle = Math.PI * d /180;
+      var m = new THREE.Matrix4();
+      m.makeRotationY(angle);
+      m.makeTranslation(dx, 0, dz);
+      this.applyMatrix(m);
+
     }
     else {
       this.v = 0;
@@ -189,8 +194,15 @@ class Ball extends Object3d {
       this.dir.set(-this.dir.x, this.dir.y, this.dir.z);
     }
     if (this.v > 0) {
-      this.translateX(this.dir.x * this.v * delta);
-      this.translateZ(this.dir.z * this.v * delta);
+      dx = this.dir.x * this.v * delta;
+      dz = this.dir.z * this.v * delta;
+      var d = Math.sqrt((dx**2) + (dz**2));
+      var angle = Math.PI * d /180;
+      var m = new THREE.Matrix4();
+      m.makeTranslation(dx, 0, dz);
+      m.makeRotationX(angle);
+
+      this.applyMatrix(m);
       this.v += a * delta;
     } else {
       this.v = 0;
@@ -221,7 +233,7 @@ class Cannon extends Object3d {
     this.cannonOuterR = 4 * k;
     this.cannonMaterial = new THREE.MeshBasicMaterial({
       color: 0xff0000,
-      wireframe: false,
+      wireframe: true,
       side: THREE.DoubleSide,
     });
     this.wheelMaterial = new THREE.MeshBasicMaterial({
