@@ -9,30 +9,35 @@ var balls = [];
 var cannon = 1;
 var rotV = 0.5;
 var time = new Date();
-var h = 30;  // Height of walls
-var r = 2;   // Radius of balls
-var N = 2;   // Number of balls
-var v = 150;
+var h = 30;   // Height of walls
+var r = 2.5;  // Radius of balls
+var N = 1;    // Number of balls
+var min_v = 80;
+var v = 120;
 const a = -40;
 const minX = -3 * h;
 const minZ = minX / 2;
 const maxZ = -minZ;
+const wallBound = 1;
+var listToPop = [];
+var showAxis = false;
+var currentAxis = false;
 
 function createCamera() {
   'use strict';
 
   var cameraO = new THREE.OrthographicCamera(
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
-      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1000);
+      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1300);
 
   cameraO.position.y = 1000;
   cameras.push(cameraO);
 
   var cameraP = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraP.position.x = 60;
-  cameraP.position.y = 120;
-  cameraP.position.z = 100;
+  cameraP.position.x = 100;
+  cameraP.position.y = 200;
+  cameraP.position.z = 200;
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 }
@@ -56,8 +61,6 @@ function createScene() {
   walls.push(wall3);
   scene.add(wall3);
 
-  var a = new THREE.AxesHelper(10);
-  scene.add(a);
 
   for (var i = 0; i < N; i++) {
     var valid = false;
@@ -78,15 +81,15 @@ function createScene() {
     scene.add(ball);
   }
 
-  var cannon1 = new Cannon(20, 0, 1.5 * h - 10, 1, Math.PI - 0.2);
+  var cannon1 = new Cannon(5, 0, 1.5 * h - 10, 1, Math.PI - 0.2);
   cannons.push(cannon1);
   scene.add(cannon1);
 
-  var cannon2 = new Cannon(20, 0, 0, 1, Math.PI);
+  var cannon2 = new Cannon(5, 0, 0, 1, Math.PI);
   cannons.push(cannon2);
   scene.add(cannon2);
 
-  var cannon3 = new Cannon(20, 0, 10 - (1.5 * h), 1, Math.PI + 0.2);
+  var cannon3 = new Cannon(5, 0, 10 - (1.5 * h), 1, Math.PI + 0.2);
   cannons.push(cannon3);
   scene.add(cannon3);
 }
@@ -101,7 +104,7 @@ function onResize() {
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  if (camera == 0) {
+  if (camera == 1 || camera == 2) {
     if (window.innerHeight > 0 && window.innerWidth > 0) {
       cameras[camera].aspect =
           renderer.getSize().width / renderer.getSize().height;
@@ -116,10 +119,6 @@ function onResize() {
   }
 }
 
-function toggleWireframe(obj) {
-  'use strict';
-  obj.toggleWireframe();
-}
 
 function onKeyDown(e) {
   switch (e.keyCode) {
@@ -135,6 +134,8 @@ function onKeyDown(e) {
     case 81:  // q
       cannon = 0;
       break;
+    case 82:  // r
+      showAxis = true;
     case 87:  // w
       cannon = 1;
       break;
@@ -171,6 +172,14 @@ function animate() {
   var newTime = new Date();
   var elapsed = (newTime - time) / 1000;
   time = newTime;
+
+  if (showAxis) {
+    currentAxis = !currentAxis;
+    for (var i = 0; i < balls.length; i++) {
+      balls[i].toggleAxis();
+    }
+    showAxis = false;
+  }
 
   if (cannon == 0) {
     cannons[0].setColor(new THREE.Color(0x00ff00));
@@ -209,14 +218,22 @@ function animate() {
     cannons[cannon].fireBall(r, v);
   }
 
+  for (var i = 0; i < balls.length; i++) {
+    balls[i].checkWallCollisions();
+  }
+
   for (var i = 0; i < balls.length - 1; i++) {
     for (var j = i + 1; j < balls.length; j++) {
-      balls[i].isCoincident(balls[j]);
+      balls[i].checkBallCollision(balls[j]);
     }
   }
 
   for (var i = 0; i < balls.length; i++) {
-    balls[i].update(elapsed);
+    balls[i].update(elapsed, i);
+    if (balls[i].position.y < -cameras[0].far) {
+      balls.splice(i, 1);
+      i--;
+    }
   }
 
   render();
