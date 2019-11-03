@@ -246,7 +246,7 @@ class Ball extends Object3d {
 
     if (this.falling) {
       var m = new THREE.Matrix4();
-      m.makeTranslation(0, -5, 0);
+      m.makeTranslation(0, -10, 0);
       this.applyMatrix(m);
     }
     this.updateCamera(dx, dz)
@@ -263,8 +263,8 @@ class Cannon extends Object3d {
 
     this.wheelR = 1 * k;
     this.cannonL = 20 * k;
-    this.cannonInnerR = 2 * k;
-    this.cannonOuterR = 4 * k;
+    this.cannonInnerR = r * k;
+    this.cannonOuterR = 2 * r * k;
     this.cannonMaterial = new THREE.MeshBasicMaterial({
       color: 0xff0000,
       wireframe: false,

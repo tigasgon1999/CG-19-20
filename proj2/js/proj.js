@@ -9,12 +9,12 @@ var balls = [];
 var cannon = 1;
 var rotV = 0.5;
 var time = new Date();
-var h = 30;  // Height of walls
-var r = 2;   // Radius of balls
-var N = 1;   // Number of balls
-var min_v = 50;
-var v = 100;
-const a = -30;
+var h = 30;   // Height of walls
+var r = 2.5;  // Radius of balls
+var N = 1;    // Number of balls
+var min_v = 80;
+var v = 120;
+const a = -40;
 const minX = -3 * h;
 const minZ = minX / 2;
 const maxZ = -minZ;
@@ -35,9 +35,9 @@ function createCamera() {
 
   var cameraP = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraP.position.x = 60;
-  cameraP.position.y = 120;
-  cameraP.position.z = 100;
+  cameraP.position.x = 100;
+  cameraP.position.y = 200;
+  cameraP.position.z = 200;
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 }
@@ -104,7 +104,7 @@ function onResize() {
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  if (camera == 0) {
+  if (camera == 1 || camera == 2) {
     if (window.innerHeight > 0 && window.innerWidth > 0) {
       cameras[camera].aspect =
           renderer.getSize().width / renderer.getSize().height;
