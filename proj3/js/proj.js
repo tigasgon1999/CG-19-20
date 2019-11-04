@@ -27,7 +27,7 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  var painting = new Painting(0, 0, 0, 20, 6, 2.13);
+  var painting = new Painting(0, 0, 0, 20, 10, 3);
   scene.add(painting);
   scene.add(new THREE.AxesHelper(5));
 }
