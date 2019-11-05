@@ -267,7 +267,7 @@ class Cannon extends Object3d {
     this.cannonOuterR = 2 * r * k;
     this.cannonMaterial = new THREE.MeshBasicMaterial({
       color: 0xff0000,
-      wireframe: false,
+      wireframe: true,
       side: THREE.DoubleSide,
     });
     this.wheelMaterial = new THREE.MeshBasicMaterial({
