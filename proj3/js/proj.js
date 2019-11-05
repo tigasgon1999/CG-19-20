@@ -94,8 +94,8 @@ function createLights() {
 
   scene.add(dirLight);
 
-  helper = new THREE.DirectionalLightHelper(dirLight, 5);
-  scene.add(helper);
+  // helper = new THREE.DirectionalLightHelper(dirLight, 5);
+  // scene.add(helper);
 
   var s1 = new Spotlight(0, 150, 0, ico, 0.4);
   scene.add(s1);
@@ -127,16 +127,16 @@ function onResize() {
   for (let i = 0; i < cameras.length; i++) {
     if (i == 1 || i == 2) {
       if (window.innerHeight > 0 && window.innerWidth > 0) {
-        cameras[camera].aspect =
+        cameras[i].aspect =
             renderer.getSize().width / renderer.getSize().height;
-        cameras[camera].updateProjectionMatrix();
+        cameras[i].updateProjectionMatrix();
       }
     } else {
-      cameras[camera].left = -window.innerWidth / camFactor;
-      cameras[camera].right = window.innerWidth / camFactor;
-      cameras[camera].top = window.innerHeight / camFactor;
-      cameras[camera].bottom = -window.innerHeight / camFactor;
-      cameras[camera].updateProjectionMatrix();
+      cameras[i].left = -window.innerWidth / camFactor;
+      cameras[i].right = window.innerWidth / camFactor;
+      cameras[i].top = window.innerHeight / camFactor;
+      cameras[i].bottom = -window.innerHeight / camFactor;
+      cameras[i].updateProjectionMatrix();
     }
   }
 }
