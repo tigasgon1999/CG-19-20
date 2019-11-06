@@ -46,15 +46,17 @@ class Wall extends Object3d {
     mesh.position.set(0, this.h / 2, 0);
     mesh.rotateY(this.theta);
     this.wall = mesh;
+    mesh.receiveShadow = true;
     this.add(mesh);
   }
 
   addBottom() {
-    let geometry = new THREE.CubeGeometry(this.l, 10, 5);
+    let geometry = new THREE.CubeGeometry(this.l, this.h / 20, 5);
     var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
     mesh.material.color.set(this.bottomColor);
     mesh.position.set(0, 5, 0);
     mesh.rotateY(this.theta);
+    mesh.receiveShadow = true;
     this.bottom = mesh;
     this.add(mesh);
   }
@@ -69,65 +71,65 @@ class TiledWall extends Object3d {
     this.n = n;
     this.sl = l / this.n;
     this.sh = h / this.n;
-    this.tiles = [];
-    this.bottomTiles = [];
+    this.bottomH = h / 20;
     this.axis = new THREE.Vector3(0, 1, 0);
+
+    this.toCentre = new THREE.Vector3().sub(this.position);
 
     this.wallColor = 0xe8e4c9;
     this.bottomColor = 0x5d432c;
 
     this.addWall();
     this.addBottom();
-
-    this.receiveShadow = true;
   }
 
   toggleMaterial(n) {
-    for (let i = 0; i < this.tiles.length; i++) {
-      this.tiles[i].material = this.materialsList[n].clone();
-      this.tiles[i].material.color.set(this.wallColor);
-    }
-    for (let i = 0; i < this.bottomTiles.length; i++) {
-      this.bottomTiles[i].material = this.materialsList[n].clone();
-      this.bottomTiles[i].material.color.set(this.bottomColor);
-    }
+    this.wall.material = this.materialsList[n].clone();
+    this.wall.material.color.set(this.wallColor);
+    this.bottom.material = this.materialsList[n].clone();
+    this.bottom.material.color.set(this.bottomColor);
   }
 
   addWall() {
-    for (let i = (-this.l + this.sl) / 2; i <= (this.l - this.sl) / 2;
-         i += this.sl) {
-      for (let j = this.h - this.sh / 2; j >= this.sh / 2; j -= this.sh) {
-        let geometry = new THREE.CubeGeometry(this.sl, this.sh, 1);
-        var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
-        mesh.material.color.set(0xe8e4c9);
-        this.tiles.push(mesh);
-        mesh.position.set(i, j, 0);
-        this.add(mesh);
+    var geometry = new THREE.Geometry();
 
-        mesh.position.applyAxisAngle(this.axis, this.theta);
-
-        mesh.rotateOnAxis(this.axis, this.theta);
-
-        // mesh.receiveShadow = true;
+    for (let i = 0; i <= this.n; i++) {
+      for (let j = 0; j <= this.n; j++) {
+        let xpos = (-this.l / 2) + i * (this.sl);
+        let ypos = this.h - j * this.sh;
+        let ver = new THREE.Vector3(xpos, ypos, 0);
+        this.worldToLocal(ver);
+        ver.applyAxisAngle(this.axis, this.theta);
+        geometry.vertices.push(ver);
       }
     }
+
+    for (let l = 0; l < geometry.vertices.length - this.n - 2;
+         l += this.n + 1) {
+      for (let v = l; v < l + this.n; v++) {
+        geometry.faces.push(
+            new THREE.Face3(v, v + 1, v + this.n + 1),
+            new THREE.Face3(v + 1, v + this.n + 2, v + this.n + 1));
+      }
+    }
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+    var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
+    mesh.material.color.set(this.wallColor);
+    mesh.receiveShadow = true;
+    this.wall = mesh;
+    this.add(mesh);
   }
 
   addBottom() {
-    for (let i = (-this.l + this.sl) / 2; i <= (this.l - this.sl) / 2;
-         i += this.sl) {
-      let geometry = new THREE.CubeGeometry(this.sl, 10, 5);
-      var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
-      mesh.material.color.set(0x5d432c);
-      this.bottomTiles.push(mesh);
-      mesh.position.set(i, 5, 0);
-      // mesh.receiveShadow = true;
-      this.add(mesh);
-
-      mesh.position.applyAxisAngle(this.axis, this.theta);
-
-      mesh.rotateOnAxis(this.axis, this.theta);
-    }
+    let geometry = new THREE.CubeGeometry(this.l, this.h / 20, 5);
+    var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
+    mesh.material.color.set(this.bottomColor);
+    mesh.position.set(0, 5, 0);
+    mesh.rotateY(this.theta);
+    mesh.receiveShadow = true;
+    this.bottom = mesh;
+    this.add(mesh);
   }
 }
 
@@ -136,39 +138,47 @@ class Icosahedron extends Object3d {
     super(x, y, z);
     this.r = r;
 
-    this.color = 0xa9a9a9;
+    this.color = 0xfadadd;
 
     var t = (1 + Math.sqrt(5)) / 2;
 
-    var vertices = [
-      -1,       t + 0.5, 0,  0.8,      t,       0, -1,      -t - 0.2, 0, 1,
-      -t + 0.2, 0,       0,  -1,       t + 0.5, 0, 1 - 0.3, t,        0, -1,
-      -t + 0.4, 0,       1,  -t + 0.5, t - 0.5, 0, -1,      t - 0.5,  0, 1,
-      -t + 0.7, 0,       -1, -t - 0.6, 0,       1
-    ];
+    this.geometry = new THREE.Geometry();
 
-    /*var vertices = [
-      -1, t,  0,  1, t, 0,  -1, -t, 0,  1, -t, 0, 0,  -1, t,  0,  1, t,
-      0,  -1, -t, 0, 1, -t, t,  0,  -1, t, 0,  1, -t, 0,  -1, -t, 0, 1
-    ];*/ //Regular Icosahedron
+    this.geometry.vertices.push(
+        new THREE.Vector3(-1, t + 0, 1, 0).multiplyScalar(this.r),
+        new THREE.Vector3(1, t - 0.1, 0).multiplyScalar(this.r),
+        new THREE.Vector3(-1 - 0.2, -t, 0).multiplyScalar(this.r),
+        new THREE.Vector3(1 + 0.2, -t, 0).multiplyScalar(this.r),
+        new THREE.Vector3(0, -1, t - 0.4).multiplyScalar(this.r),
+        new THREE.Vector3(0, 1, t - 0.2).multiplyScalar(this.r),
+        new THREE.Vector3(0, -1, -t + 0.1).multiplyScalar(this.r),
+        new THREE.Vector3(0, 1, -t - 0.4).multiplyScalar(this.r),
+        new THREE.Vector3(t + 0.2, 0, -1).multiplyScalar(this.r),
+        new THREE.Vector3(t + 0.1, 0, 1).multiplyScalar(this.r),
+        new THREE.Vector3(-t - 0.5, 0, -1).multiplyScalar(this.r),
+        new THREE.Vector3(-t + 0.2, 0, 1).multiplyScalar(this.r));
 
-    var indices = [
-      0, 11, 5,  0, 5,  1, 0, 1, 7, 0, 7,  10, 0, 10, 11, 1, 5, 9, 5, 11,
-      4, 11, 10, 2, 10, 7, 6, 7, 1, 8, 3,  9,  4, 3,  4,  2, 3, 2, 6, 3,
-      6, 8,  3,  8, 9,  4, 9, 5, 2, 4, 11, 6,  2, 10, 8,  6, 7, 9, 8, 1
-    ];
+    this.geometry.faces.push(
+        new THREE.Face3(0, 11, 5), new THREE.Face3(0, 5, 1),
+        new THREE.Face3(0, 1, 7), new THREE.Face3(0, 7, 10),
+        new THREE.Face3(0, 10, 11), new THREE.Face3(1, 5, 9),
+        new THREE.Face3(5, 11, 4), new THREE.Face3(11, 10, 2),
+        new THREE.Face3(10, 7, 6), new THREE.Face3(7, 1, 8),
+        new THREE.Face3(3, 9, 4), new THREE.Face3(3, 4, 2),
+        new THREE.Face3(3, 2, 6), new THREE.Face3(3, 6, 8),
+        new THREE.Face3(3, 8, 9), new THREE.Face3(4, 9, 5),
+        new THREE.Face3(2, 4, 11), new THREE.Face3(6, 2, 10),
+        new THREE.Face3(8, 6, 7), new THREE.Face3(9, 8, 1));
 
-    this.geometry = new THREE.PolyhedronGeometry(vertices, indices, r);
+    this.geometry.computeFaceNormals();
+    this.geometry.computeVertexNormals();
 
     var mesh = new THREE.Mesh(this.geometry, this.materialsList[1].clone());
     mesh.material.color.set(this.color);
-    mesh.position.set(0, r - 2 * t, 0);
-
-    mesh.castShadow = true;
-
+    mesh.position.set(0, this.r * t, 0);
     this.mesh = mesh;
-
     this.add(mesh);
+    mesh.castShadow = true;
   }
 
   toggleMaterial(n) {
@@ -196,6 +206,7 @@ class Floor extends Object3d {
     mesh.material.color.set(this.color);
     mesh.position.set(0, 0, 0);
     this.floor = mesh;
+    mesh.receiveShadow = true;
 
     this.add(mesh);
   }
@@ -214,7 +225,6 @@ class TiledFloor extends Object3d {
     this.n = n;
     this.seg_l = this.l / this.n;
     this.seg_w = this.w / this.n;
-    this.tiles = [];
 
     this.color = 0x86242a;
 
@@ -222,45 +232,57 @@ class TiledFloor extends Object3d {
   }
 
   addFloor() {
-    for (let i = (-this.l + this.seg_l) / 2; i <= (this.l - this.seg_l) / 2;
-         i += this.seg_l) {
-      for (let j = (-this.w + this.seg_w) / 2; j <= (this.w - this.seg_w) / 2;
-           j += this.seg_w) {
-        let geometry = new THREE.CubeGeometry(this.seg_l, 1, this.seg_w);
-        var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
-        mesh.material.color.set(this.color);
-        mesh.position.set(i, 0, j);
-        mesh.receiveShadow = true;
-        this.tiles.push(mesh);
+    var geometry = new THREE.Geometry();
 
-        this.add(mesh);
+    for (let i = 0; i <= this.n; i++) {
+      for (let j = 0; j <= this.n; j++) {
+        let xpos = (-this.l / 2) + i * (this.seg_l);
+        let zpos = (-this.w / 2) + j * this.seg_w;
+        let ver = new THREE.Vector3(xpos, 0, zpos);
+        geometry.vertices.push(ver);
       }
     }
+
+    for (let l = 0; l < geometry.vertices.length - this.n - 2;
+         l += this.n + 1) {
+      for (let v = l; v < l + this.n; v++) {
+        geometry.faces.push(
+            new THREE.Face3(v, v + 1, v + this.n + 1),
+            new THREE.Face3(v + 1, v + this.n + 2, v + this.n + 1));
+      }
+    }
+    geometry.computeFaceNormals();
+    geometry.computeVertexNormals();
+    var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
+    mesh.material.color.set(this.color);
+    mesh.receiveShadow = true;
+    this.floor = mesh;
+    this.add(mesh);
   }
 
   toggleMaterial(n) {
-    for (let i = 0; i < this.tiles.length; i++) {
-      this.tiles[i].material = this.materialsList[n].clone();
-      this.tiles[i].material.color.set(this.color);
-    }
+    this.floor.material = this.materialsList[n].clone();
+    this.floor.material.color.set(this.color);
   }
 }
 
 class Stand extends Object3d {
-  constructor(x, y, z, h) {
+  constructor(x, y, z, h, color) {
     super(x, y, z);
     this.h = h;
-    this.color = 0x464646;
+    this.baseL = h / 2;
+    this.baseH = h / 10;
+    this.armL = h / 10;
+    color == undefined ? this.color = 0x464646 : this.color = color;
     this.slabs = [];
 
-    this.addSlab(0, 2.5, 0);
-    this.addArm(0, 5 + h / 2, 0);
-    this.addSlab(0, 7.5 + h, 0);
-    this.castShadow = true;
+    this.addSlab(0, this.baseH / 2, 0);
+    this.addArm(0, this.baseH + this.h / 2, 0);
+    this.addSlab(0, 1.5 * this.baseH + this.h, 0);
   }
 
   addSlab(x, y, z) {
-    let geometry = new THREE.CubeGeometry(this.h / 2, 5, this.h / 2);
+    let geometry = new THREE.CubeGeometry(this.baseL, this.baseH, this.baseL);
     var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
     mesh.position.set(x, y, z);
     mesh.castShadow = true;
@@ -271,7 +293,7 @@ class Stand extends Object3d {
   }
 
   addArm(x, y, z) {
-    let geometry = new THREE.CubeGeometry(5, this.h, 5);
+    let geometry = new THREE.CubeGeometry(this.armL, this.h, this.armL);
     var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
     mesh.position.set(x, y, z);
     mesh.castShadow = true;
@@ -305,6 +327,10 @@ class Spotlight extends Object3d {
     this.onMaterial =
         new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide});
 
+    this.coneR = 7;
+    this.coneL = this.coneR * 2 + 1;
+    this.sphereR = this.coneR / 2;
+
 
     this.addCone();
     this.addSphere();
@@ -316,22 +342,22 @@ class Spotlight extends Object3d {
   addSignal() {
     var geo = new THREE.SphereGeometry(2, 20, 20);
     var mesh = new THREE.Mesh(geo, this.onMaterial);
-    mesh.position.set(0, 0, -10);
+    mesh.position.set(0, 0, -this.coneL / 2);
     this.on = mesh;
     this.add(mesh);
   }
 
   addCone() {
-    var geo = new THREE.ConeGeometry(10, 20, 50, 5, true);
+    var geo = new THREE.ConeGeometry(this.coneR, this.coneL, 30, 5, true);
     var mesh = new THREE.Mesh(geo, this.coneMaterial);
     mesh.rotateX(-Math.PI / 2);
     this.add(mesh);
   }
 
   addSphere() {
-    var geo = new THREE.SphereGeometry(5, 25, 25);
+    var geo = new THREE.SphereGeometry(this.sphereR, 25, 25);
     var mesh = new THREE.Mesh(geo, this.bulbMaterial);
-    mesh.position.set(0, 0, 5);
+    mesh.position.set(0, 0, this.coneL / 4);
     this.add(mesh);
   }
 
@@ -343,12 +369,16 @@ class Spotlight extends Object3d {
 
     spotlight.target = obj;
 
-    spotlight.shadow.mapSize.width = 128;
-    spotlight.shadow.mapSize.height = 128;
+    spotlight.shadow.mapSize.width = 512;
+    spotlight.shadow.mapSize.height = 512;
 
     spotlight.shadow.camera.near = 0.5;
     spotlight.shadow.camera.far = 400;
     spotlight.shadow.camera.fov = 30;
+
+    spotlight.decay = 2;
+    spotlight.penumbra = 0.2;
+    spotlight.distance = 800;
     this.light = spotlight;
 
     scene.add(spotlight);
@@ -406,8 +436,8 @@ class Painting extends Object3d {
         new THREE.CubeGeometry(this.bgL * 1.05, this.bgH * 1.1, this.bgW / 2);
     var mesh1 = new THREE.Mesh(geometry, this.materialsList[1].clone());
     mesh1.material.color.set(this.frameColor);
-    this.frame = mesh1;
     mesh1.position.set(0, 0, 0);
+    this.frame = mesh1;
     this.add(mesh1);
   }
 
