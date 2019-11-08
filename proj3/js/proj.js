@@ -32,9 +32,9 @@ function createCamera() {
 
   var cameraP = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraP.position.x = -300;
-  cameraP.position.y = 400;
-  cameraP.position.z = 500;
+  cameraP.position.x = -350;
+  cameraP.position.y = 350;
+  cameraP.position.z = 450;
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 
@@ -52,43 +52,36 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  // var backWall = new Wall(0, 0, -100, 500, 200, 0);
+  // var backWall = new Wall(100, 0, -150, 800, 500, 0);
   // objs.push(backWall);
   // scene.add(backWall);
 
-  // var sideWall1 = new Wall(250, 0, 50, 300, 200, Math.PI / 2);
+  // var sideWall1 = new Wall(300, 0, 200, 700, 500, Math.PI / 2);
   // objs.push(sideWall1);
   // scene.add(sideWall1);
 
-  // var sideWall2 = new Wall(-250, 0, 50, 300, 200, Math.PI / 2);
-  // objs.push(sideWall2);
-  // scene.add(sideWall2);
 
-  // var floor = new Floor(0, 0, 0, 500, 300);
+  // var floor = new Floor(-100, 0, 200, 800, 700);
   // objs.push(floor);
   // scene.add(floor);
 
-  var backWall = new TiledWall(0, 0, -150, 500, 200, 0, 100);
+  var backWall = new TiledWall(-100, 0, -150, 800, 500, 0, 300);
   objs.push(backWall);
   scene.add(backWall);
 
-  var sideWall1 = new TiledWall(250, 0, 0, 300, 200, Math.PI / 2, 100);
+  var sideWall1 = new TiledWall(300, 0, 200, 700, 500, Math.PI / 2, 300);
   objs.push(sideWall1);
   scene.add(sideWall1);
 
-  // var sideWall2 = new TiledWall(-250, 0, 0, 300, 200, Math.PI / 2, 100);
-  // objs.push(sideWall2);
-  // scene.add(sideWall2);
-
-  var floor = new TiledFloor(0, 0, 0, 500, 300, 100);
+  var floor = new TiledFloor(-100, 0, 200, 800, 700, 300);
   objs.push(floor);
   scene.add(floor);
 
-  painting = new Painting(-60, 110, backWall.position.z, 20, 10, 3);
+  painting = new Painting(-150, 110, backWall.position.z, 20, 10, 3);
   objs.push(painting);
   scene.add(painting);
 
-  var stand = new Stand(100, 0, -20, 50);
+  var stand = new Stand(100, 0, 60, 50);
   objs.push(stand);
   scene.add(stand);
 

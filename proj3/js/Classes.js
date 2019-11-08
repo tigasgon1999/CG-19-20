@@ -23,8 +23,8 @@ class Wall extends Object3d {
     this.theta = theta;
     this.l = l;
     this.h = h;
-    this.wallColor = 0xe8e4c9;
-    this.bottomColor = 0x5d432c;
+    this.wallColor = 0xa9a9a9;
+    this.bottomColor = 0xffffff;
 
     this.addWall();
     this.addBottom();
@@ -71,13 +71,15 @@ class TiledWall extends Object3d {
     this.n = n;
     this.sl = l / this.n;
     this.sh = h / this.n;
-    this.bottomH = h / 20;
+    this.bottomH = h / 40;
     this.axis = new THREE.Vector3(0, 1, 0);
 
     this.toCentre = new THREE.Vector3().sub(this.position);
 
-    this.wallColor = 0xe8e4c9;
-    this.bottomColor = 0x5d432c;
+    // this.wallColor = 0xe8e4c9;
+    // this.bottomColor = 0x5d432c;
+    this.wallColor = 0xa9a9a9;
+    this.bottomColor = 0xffffff;
 
     this.addWall();
     this.addBottom();
@@ -122,7 +124,7 @@ class TiledWall extends Object3d {
   }
 
   addBottom() {
-    let geometry = new THREE.CubeGeometry(this.l, this.h / 20, 5);
+    let geometry = new THREE.CubeGeometry(this.l, this.bottomH, 5);
     var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
     mesh.material.color.set(this.bottomColor);
     mesh.position.set(0, 5, 0);
@@ -131,6 +133,72 @@ class TiledWall extends Object3d {
     this.bottom = mesh;
     this.add(mesh);
   }
+
+  // addBottom() {
+  //   var geometry = new THREE.Geometry();
+
+  //   for (let i = 0; i <= this.n; i++) {
+  //     for (let j = 0; j <= 1; j++) {
+  //       let xpos = (-this.l / 2) + i * (this.sl);
+  //       let ypos = this.bottomH - j * this.bottomH;
+  //       let ver = new THREE.Vector3(xpos, ypos, 2.5);
+  //       this.worldToLocal(ver);
+  //       ver.applyAxisAngle(this.axis, this.theta);
+  //       geometry.vertices.push(ver);
+  //     }
+  //   }
+
+  //   for (let l = 0; l < geometry.vertices.length - this.n - 2;
+  //        l += this.n + 1) {
+  //     for (let v = l; v < l + this.n; v++) {
+  //       geometry.faces.push(
+  //           new THREE.Face3(v, v + 1, v + this.n + 1),
+  //           new THREE.Face3(v + 1, v + this.n + 2, v + this.n + 1));
+  //     }
+  //   }
+
+  //   var offset = geometry.vertices.length;
+
+  //   var ver = new THREE.Vector3(-this.l / 2, this.bottomH, -2.5);  // offset
+  //   this.worldToLocal(ver);
+  //   ver.applyAxisAngle(this.axis, this.theta);
+  //   geometry.vertices.push(ver);
+
+  //   ver = new THREE.Vector3(-this.l / 2, 0, -2.5);  // offset + 1
+  //   this.worldToLocal(ver);
+  //   ver.applyAxisAngle(this.axis, this.theta);
+  //   geometry.vertices.push(ver);
+
+  //   ver = new THREE.Vector3(this.l / 2, this.bottomH, -2.5);  // offset+2
+  //   this.worldToLocal(ver);
+  //   ver.applyAxisAngle(this.axis, this.theta);
+  //   geometry.vertices.push(ver);
+
+  //   ver = new THREE.Vector3(this.l / 2, 0, -2.5);  // offset+3
+  //   this.worldToLocal(ver);
+  //   ver.applyAxisAngle(this.axis, this.theta);
+  //   geometry.vertices.push(ver);
+
+  //   geometry.faces.push(
+  //       new THREE.Face3(0, offset, offset + 1),
+  //       new THREE.Face3(0, offset + 1, this.n),
+  //       new THREE.Face3(offset - 1 - this.n, offset + 2, offset),
+  //       new THREE.Face3(offset - 1 - this.n, offset, 0),
+  //       new THREE.Face3(offset + 3, offset + 1, offset),
+  //       new THREE.Face3(offset + 3, offset, offset + 2),
+  //       new THREE.Face3(offset - 1, offset + 3, offset + 2),
+  //       new THREE.Face3(offset + 2, offset - 1 - this.n, offset - 1),
+  //   );
+
+
+  //   geometry.computeFaceNormals();
+  //   geometry.computeVertexNormals();
+  //   var mesh = new THREE.Mesh(geometry, this.materialsList[1].clone());
+  //   mesh.material.color.set(this.wallColor);
+  //   mesh.receiveShadow = true;
+  //   this.wall = mesh;
+  //   this.add(mesh);
+  // }
 }
 
 class Icosahedron extends Object3d {
@@ -193,7 +261,7 @@ class Floor extends Object3d {
     this.l = l;
     this.w = w;
 
-    this.color = 0x86242a;
+    this.color = 0x43464b;
 
     this.addFloor();
 
@@ -226,7 +294,7 @@ class TiledFloor extends Object3d {
     this.seg_l = this.l / this.n;
     this.seg_w = this.w / this.n;
 
-    this.color = 0x86242a;
+    this.color = 0x43464b;
 
     this.addFloor();
   }
@@ -273,7 +341,7 @@ class Stand extends Object3d {
     this.baseL = h / 2;
     this.baseH = h / 10;
     this.armL = h / 10;
-    color == undefined ? this.color = 0x464646 : this.color = color;
+    color == undefined ? this.color = 0xa9a9a9 : this.color = color;
     this.slabs = [];
 
     this.addSlab(0, this.baseH / 2, 0);
@@ -389,7 +457,6 @@ class Spotlight extends Object3d {
     this.on.visible = !this.on.visible;
   }
 }
-
 
 class Painting extends Object3d {
   constructor(x, y, z, k, squares, line) {
