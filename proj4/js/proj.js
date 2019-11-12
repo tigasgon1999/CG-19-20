@@ -3,6 +3,8 @@
 var cameras = [], scene, renderer, camFactor = 12;
 var camera = 1;
 var newcam = 1;
+var r = 32;
+var time = new Date();
 
 var currMat = 0;
 
@@ -11,6 +13,7 @@ var spotlight, toggleSpot;
 
 var toggleMat = false, toggleWire = false;
 
+var ball;
 var objs = [];
 
 var l = 640;
@@ -51,6 +54,10 @@ function createScene() {
   let board = new ChessBoard(0, 0, 0, l);
   objs.push(board);
   scene.add(board);
+
+  ball = new Ball(-5 * r, 0, 5 * r, r)
+  objs.push(ball);
+  scene.add(ball);
 }
 
 function createLights() {
@@ -69,10 +76,10 @@ function createLights() {
   scene.add(dirLight);
   toggleDir = false;
 
-  spotlight = new THREE.SpotLight(0xffffff, 1);
-  spotlight.position.set(l / 3, 10, 0);
+  spotlight = new THREE.SpotLight(0xffffff, 5);
+  spotlight.position.set(l / 2, 100, -l / 2);
 
-  spotlight.angle = Math.PI / 4;
+  spotlight.angle = Math.PI / 2;
   spotlight.castShadow = true;
 
   spotlight.target = objs[0];
@@ -119,7 +126,6 @@ function onResize() {
   }
 }
 
-
 function onKeyDown(e) {
   switch (e.keyCode) {
     case 53:  // 5
@@ -150,6 +156,9 @@ function onKeyUp(e) {
 
 function animate() {
   'use strict';
+  var newTime = new Date();
+  var elapsed = (newTime - time) / 1000;
+  time = newTime;
 
   if (newcam != camera) {
     camera = newcam;
@@ -173,6 +182,8 @@ function animate() {
     }
     toggleMat = false;
   }
+
+  ball.update(elapsed);
 
   render();
 

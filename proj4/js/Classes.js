@@ -86,3 +86,66 @@ class ChessBoard extends Object3d {
     }
   }
 }
+
+class Ball extends Object3d {
+  constructor(x, y, z, r) {
+    'use strict';
+
+    super(x, y + r, z);
+    this.bound = 1.25 * r;
+    this.r = r;
+
+    this.tex = new THREE.TextureLoader().load('textures/monalisa.jpg');
+    this.tex.wrapS = THREE.RepeatWrapping;
+    this.tex.wrapT = THREE.RepeatWrapping;
+    this.tex.repeat.set(1, 1);
+
+    // TODO: specular
+    for (let i = 0; i < this.mats.length; i++) {
+      this.mats[i].map = this.tex;
+      this.mats[i].bumpMap = this.tex;
+      this.mats[i].shininess = 50;
+      this.mats[i].specular = 0xffffff;
+    }
+
+
+
+    this.addBall(0, 0, 0, r);
+    this.axis = new THREE.AxesHelper(this.r * 2);
+    this.axis.position.set(0, 0, 0);
+    this.axis.visible = false;
+    this.add(this.axis);
+  }
+
+  addBall(x, y, z, r) {
+    'use strict';
+
+    var geometry = new THREE.SphereGeometry(r, 50, 50);
+    geometry.center(this.position);
+    this.mesh = new THREE.Mesh(geometry, this.mats[0].clone());
+    this.mesh.position.set(x, y, z);
+
+    this.add(this.mesh);
+  }
+
+  update(delta, self) {
+    // var dx = 0
+    // var dz = 0
+    // dx = this.dir.x * this.v * delta;
+    // dz = this.dir.z * this.v * delta;
+    // var moveVector = new THREE.Vector3(dx, 0, dz);
+    // moveVector = this.localToWorld(moveVector);
+    // this.v += a * delta;
+
+    // this.move(dx, dz);
+    this.mesh.rotateX(-Math.PI / 4 * delta);
+  }
+
+  toggleWireframe() {
+    this.mesh.material.wireframe = !this.mesh.material.wireframe;
+  }
+
+  toggleMaterial(n) {
+    this.mesh.material = this.mats[n].clone();
+  }
+}
