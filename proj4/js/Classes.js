@@ -39,3 +39,11 @@ class ChessBoard extends THREE.Object3D {
     }
   }
 }
+
+class Dice extends THREE.Object3D{
+  constructor(x, y, z) {
+    super(x, y, z);
+
+  
+  }
+}
