@@ -44,6 +44,7 @@ function createScene() {
   scene = new THREE.Scene();
 
   scene.add(new ChessBoard(0, 0, 0, 640));
+  scene.add(new Ball(0, 0, 0, 32));
 }
 
 function createLights() {
@@ -89,7 +90,6 @@ function onResize() {
     }
   }
 }
-
 
 function onKeyDown(e) {
   switch (e.keyCode) {
