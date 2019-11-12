@@ -4,42 +4,33 @@ var cameras = [], scene, renderer, camFactor = 12;
 var camera = 1;
 var newcam = 1;
 
+var dirLight, toggleDir;
+var spotlight, toggleSpot;
+
 var objs = [];
-
-var dirLight;
-var toggleDir;
-var ico;
-var painting;
-
-var currMat = 1;
-var prevMat = 1;
-var lastMat = 1;
-
-var spotlights = [];  // [spot1, spot2, spot3,spot4]
-var lights = [];
 
 function createCamera() {
   'use strict';
 
   var cameraO = new THREE.OrthographicCamera(
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
-      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 1300);
+      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 2000);
 
-  cameraO.position.x = painting.position.x;
-  cameraO.position.y = painting.position.y;
-  cameraO.position.z = painting.position.z + 700;
+  cameraO.position.x = 0;
+  cameraO.position.y = 800;
+  cameraO.position.z = 0;
   cameras.push(cameraO);
 
   var cameraP = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 1000);
-  cameraP.position.x = -350;
-  cameraP.position.y = 350;
-  cameraP.position.z = 450;
+      50, window.innerWidth / window.innerHeight, 1, 2000);
+  cameraP.position.x = -150;
+  cameraP.position.y = 250;
+  cameraP.position.z = 250;
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 
   var cameraP2 = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 1000);
+      50, window.innerWidth / window.innerHeight, 1, 2000);
   cameraP2.position.x = 300;
   cameraP2.position.y = 400;
   cameraP2.position.z = 500;
@@ -52,43 +43,7 @@ function createScene() {
 
   scene = new THREE.Scene();
 
-  // var backWall = new Wall(100, 0, -150, 800, 500, 0);
-  // objs.push(backWall);
-  // scene.add(backWall);
-
-  // var sideWall1 = new Wall(300, 0, 200, 700, 500, Math.PI / 2);
-  // objs.push(sideWall1);
-  // scene.add(sideWall1);
-
-
-  // var floor = new Floor(-100, 0, 200, 800, 700);
-  // objs.push(floor);
-  // scene.add(floor);
-
-  var backWall = new TiledWall(-100, 0, -150, 800, 500, 0, 300);
-  objs.push(backWall);
-  scene.add(backWall);
-
-  var sideWall1 = new TiledWall(300, 0, 200, 700, 500, Math.PI / 2, 300);
-  objs.push(sideWall1);
-  scene.add(sideWall1);
-
-  var floor = new TiledFloor(-100, 0, 200, 800, 700, 300);
-  objs.push(floor);
-  scene.add(floor);
-
-  painting = new Painting(-150, 110, backWall.position.z, 20, 10, 3);
-  objs.push(painting);
-  scene.add(painting);
-
-  var stand = new Stand(100, 0, 60, 50);
-  objs.push(stand);
-  scene.add(stand);
-
-  ico = new Icosahedron(
-      stand.position.x, stand.h + 2 * stand.baseH, stand.position.z, 10);
-  objs.push(ico);
-  scene.add(ico);
+  scene.add(new ChessBoard(0, 0, 0, 640));
 }
 
 function createLights() {
@@ -106,43 +61,6 @@ function createLights() {
 
   scene.add(dirLight);
   toggleDir = false;
-
-  // helper = new THREE.DirectionalLightHelper(dirLight, 5);
-  // scene.add(helper);
-
-  let r = 130;
-  let h = 180;
-
-  let p1 = new THREE.Vector3(ico.position.x - r, h, ico.position.z);
-
-  var s1 = new Spotlight(p1.x, p1.y, p1.z, ico, 0.5);
-  scene.add(s1);
-  spotlights.push(s1);
-  lights.push(false);
-
-  let p2 = new THREE.Vector3(
-      ico.position.x + r * Math.cos(Math.PI / 3), h,
-      ico.position.z - r * Math.sin(Math.PI / 3));
-
-  var s2 = new Spotlight(p2.x, p2.y, p2.z, ico, 0.5);
-  scene.add(s2);
-  spotlights.push(s2);
-  lights.push(false);
-
-  let p3 = new THREE.Vector3(
-      ico.position.x + r * Math.cos(Math.PI / 3), h,
-      ico.position.z + r * Math.sin(Math.PI / 3));
-
-  var s3 = new Spotlight(p3.x, p3.y, p3.z, ico, 0.5);
-  scene.add(s3);
-  spotlights.push(s3);
-  lights.push(false);
-
-  var s4 = new Spotlight(
-      painting.position.x, 10, painting.position.z + 100, painting, 0.9);
-  scene.add(s4);
-  spotlights.push(s4);
-  lights.push(false);
 }
 
 function render() {
@@ -175,18 +93,6 @@ function onResize() {
 
 function onKeyDown(e) {
   switch (e.keyCode) {
-    case 49:  // 1
-      lights[0] = true;
-      break;
-    case 50:  // 2
-      lights[1] = true;
-      break;
-    case 51:  // 3
-      lights[2] = true;
-      break;
-    case 52:  // 4
-      lights[3] = true;
-      break;
     case 53:  // 5
       newcam = 1;
       break;
@@ -196,22 +102,8 @@ function onKeyDown(e) {
     case 55:  // 7
       newcam = 2
       break;
-    case 81:  // Q
+    case 68:  // D
       toggleDir = true;
-      break;
-    case 87:  // W
-      if (currMat == 0) {
-        currMat = prevMat;
-      } else {
-        prevMat = currMat;
-        currMat = 0;
-      }
-      break;
-    case 69:  // E
-      if (currMat != 0) {
-        currMat == 1 ? currMat = 2 : currMat = 1;
-      }
-      prevMat == 1 ? prevMat = 2 : prevMat = 1;
       break;
   }
 }
@@ -225,21 +117,6 @@ function animate() {
 
   if (newcam != camera) {
     camera = newcam;
-  }
-
-
-  if (lastMat != currMat) {
-    lastMat = currMat;
-    for (let i = 0; i < objs.length; i++) {
-      objs[i].toggleMaterial(currMat);
-    }
-  }
-
-  for (let i = 0; i < lights.length; i++) {
-    if (lights[i]) {
-      spotlights[i].toggleLight();
-      lights[i] = false;
-    }
   }
 
   if (toggleDir) {
