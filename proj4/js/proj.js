@@ -4,10 +4,16 @@ var cameras = [], scene, renderer, camFactor = 12;
 var camera = 1;
 var newcam = 1;
 
+var currMat = 0;
+
 var dirLight, toggleDir;
 var spotlight, toggleSpot;
 
+var toggleMat = false, toggleWire = false;
+
 var objs = [];
+
+var l = 640;
 
 function createCamera() {
   'use strict';
@@ -17,15 +23,15 @@ function createCamera() {
       window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 2000);
 
   cameraO.position.x = 0;
-  cameraO.position.y = 800;
+  cameraO.position.y = 700;
   cameraO.position.z = 0;
   cameras.push(cameraO);
 
   var cameraP = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 2000);
-  cameraP.position.x = -150;
-  cameraP.position.y = 250;
-  cameraP.position.z = 250;
+  cameraP.position.x = 450;
+  cameraP.position.y = 550;
+  cameraP.position.z = 450;
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 
@@ -42,8 +48,9 @@ function createScene() {
   'use strict';
 
   scene = new THREE.Scene();
-
-  scene.add(new ChessBoard(0, 0, 0, 640));
+  let board = new ChessBoard(0, 0, 0, l);
+  objs.push(board);
+  scene.add(board);
 }
 
 function createLights() {
@@ -61,6 +68,28 @@ function createLights() {
 
   scene.add(dirLight);
   toggleDir = false;
+
+  spotlight = new THREE.SpotLight(0xffffff, 1);
+  spotlight.position.set(l / 3, 10, 0);
+
+  spotlight.angle = Math.PI / 4;
+  spotlight.castShadow = true;
+
+  spotlight.target = objs[0];
+
+  spotlight.shadow.mapSize.width = 512;
+  spotlight.shadow.mapSize.height = 512;
+
+  spotlight.shadow.camera.near = 0.5;
+  spotlight.shadow.camera.far = 400;
+  spotlight.shadow.camera.fov = 30;
+
+  spotlight.decay = 2;
+  spotlight.penumbra = 0.2;
+  spotlight.distance = 800;
+
+  scene.add(spotlight);
+  toggleSpot = false;
 }
 
 function render() {
@@ -105,6 +134,13 @@ function onKeyDown(e) {
     case 68:  // D
       toggleDir = true;
       break;
+    case 87:  // W
+      toggleWire = true;
+      break;
+    case 76:  // L
+      currMat = (currMat + 1) % 2;
+      toggleMat = true;
+      break;
   }
 }
 
@@ -123,6 +159,21 @@ function animate() {
     dirLight.visible = !dirLight.visible;
     toggleDir = false;
   }
+
+  if (toggleWire) {
+    for (let i = 0; i < objs.length; i++) {
+      objs[i].toggleWireframe();
+    }
+    toggleWire = false;
+  }
+
+  if (toggleMat) {
+    for (let i = 0; i < objs.length; i++) {
+      objs[i].toggleMaterial(currMat);
+    }
+    toggleMat = false;
+  }
+
   render();
 
   requestAnimationFrame(animate);
