@@ -3,10 +3,12 @@
 var cameras = [], scene, renderer, camFactor = 12;
 var camera = 1;
 var newcam = 1;
+var r = 32;
+var time = new Date();
 
 var dirLight, toggleDir;
 var spotlight, toggleSpot;
-
+var ball;
 var objs = [];
 
 function createCamera() {
@@ -23,9 +25,9 @@ function createCamera() {
 
   var cameraP = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 2000);
-  cameraP.position.x = -150;
-  cameraP.position.y = 250;
-  cameraP.position.z = 250;
+  cameraP.position.x = -250;
+  cameraP.position.y = 350;
+  cameraP.position.z = 350;
   cameras.push(cameraP);
   cameraP.lookAt(scene.position);
 
@@ -44,7 +46,8 @@ function createScene() {
   scene = new THREE.Scene();
 
   scene.add(new ChessBoard(0, 0, 0, 640));
-  scene.add(new Ball(0, 0, 0, 32));
+  ball = new Ball(-5*r, 0, 5*r, r)
+  scene.add(ball);
 }
 
 function createLights() {
@@ -114,6 +117,9 @@ function onKeyUp(e) {
 
 function animate() {
   'use strict';
+  var newTime = new Date();
+  var elapsed = (newTime - time) / 1000;
+  time = newTime;
 
   if (newcam != camera) {
     camera = newcam;
@@ -123,6 +129,9 @@ function animate() {
     dirLight.visible = !dirLight.visible;
     toggleDir = false;
   }
+
+  ball.update(elapsed);
+
   render();
 
   requestAnimationFrame(animate);
