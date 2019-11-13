@@ -1,8 +1,7 @@
 /*global THREE*/
 
 var cameras = [], scene, renderer, camFactor = 12;
-var camera = 1, toggleCam = false;
-var r = 32;
+var camera = 1, toggleCam = false, newcam = 1;
 var time = new Date();
 
 var currMat = 0;
@@ -12,7 +11,7 @@ var spotlight, toggleSpot = false;
 
 var toggleMat = false, toggleWire = false;
 
-var ball, board;
+var ball, board, dice;
 var objs = [];
 
 const a = 40;
@@ -21,18 +20,22 @@ var moving = false;
 var toggleReload = false;
 
 
-var l = 640;
+const l = 640;
+const r = 32;
+const h = 10;
+const vmax = 100;
+
 
 function createCamera() {
   'use strict';
 
   var cameraO = new THREE.OrthographicCamera(
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
-      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 2000);
+      window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 5000);
 
   cameraO.position.x = 0;
-  cameraO.position.y = 700;
-  cameraO.position.z = 0;
+  cameraO.position.y = 0;
+  cameraO.position.z = 2000;
   cameras.push(cameraO);
 
   var cameraP = new THREE.PerspectiveCamera(
@@ -45,9 +48,9 @@ function createCamera() {
 
   var cameraP2 = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 2000);
-  cameraP2.position.x = 300;
-  cameraP2.position.y = 400;
-  cameraP2.position.z = 500;
+  cameraP2.position.x = 320;
+  cameraP2.position.y = 40;
+  cameraP2.position.z = 320;
   cameras.push(cameraP2);
   cameraP2.lookAt(scene.position);
 }
@@ -87,18 +90,22 @@ function createScene() {
 }
 
 function createObjs() {
-  board = new ChessBoard(0, 0, 0, l);
+  board = new ChessBoard(0, 0, 0, l, h);
   objs.push(board);
   scene.add(board);
 
-  ball = new Ball(-l / 2 + 3 * r, 0, 0, r, 100)
+  ball = new Ball(-l / 2 + 3 * r, h, 0, r, vmax);
   objs.push(ball);
   scene.add(ball);
+
+  dice = new Dice(0, h, 0, 40);
+  objs.push(dice);
+  scene.add(dice);
 }
 
 function createLights() {
   dirLight = new THREE.DirectionalLight(0xffffff, 2);
-  dirLight.position.set(-250, 300, 200);
+  dirLight.position.set(0, 300, l);
 
   dirLight.shadow.camera.near = 2;
   dirLight.shadow.camera.far = 1000;
@@ -165,15 +172,15 @@ function onResize() {
 function onKeyDown(e) {
   switch (e.keyCode) {
     case 53:  // 5
-      camera = 1;
+      newcam = 1;
       toggleCam = true;
       break;
     case 54:  // 6
-      camera = 0;
+      newcam = 0;
       toggleCam = true;
       break;
     case 55:  // 7
-      camera = 2
+      newcam = 2
       toggleCam = true;
       break;
     case 66:  // B
@@ -188,6 +195,9 @@ function onKeyDown(e) {
     case 76:  // L
       currMat = (currMat + 1) % 2;
       toggleMat = true;
+      break;
+    case 80:  // P
+      toggleSpot = true;
       break;
     case 82:  // R
       toggleReload = true;
@@ -219,6 +229,11 @@ function animate() {
     toggleDir = false;
   }
 
+  if (toggleSpot) {
+    spotlight.visible = !spotlight.visible;
+    toggleSpot = false;
+  }
+
   if (toggleWire) {
     for (let i = 0; i < objs.length; i++) {
       objs[i].toggleWireframe();
@@ -234,6 +249,7 @@ function animate() {
   }
 
   ball.update(elapsed, moving);
+  dice.update(elapsed);
 
   render();
 
