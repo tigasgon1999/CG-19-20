@@ -33,6 +33,8 @@ class ChessBoard extends Object3d {
     this.borderColor = 0x5d432c;
     this.squares = [];
 
+    // this.add(new THREE.AxesHelper(l * 2))
+
 
 
     this.addBorder();
@@ -88,12 +90,14 @@ class ChessBoard extends Object3d {
 }
 
 class Ball extends Object3d {
-  constructor(x, y, z, r) {
+  constructor(x, y, z, r, v_max) {
     'use strict';
 
     super(x, y + r, z);
     this.bound = 1.25 * r;
     this.r = r;
+    this.v = 0;
+    this.vmax = v_max;
 
     this.tex = new THREE.TextureLoader().load('textures/monalisa.jpg');
     this.tex.wrapS = THREE.RepeatWrapping;
@@ -128,17 +132,32 @@ class Ball extends Object3d {
     this.add(this.mesh);
   }
 
-  update(delta, self) {
-    // var dx = 0
-    // var dz = 0
-    // dx = this.dir.x * this.v * delta;
-    // dz = this.dir.z * this.v * delta;
-    // var moveVector = new THREE.Vector3(dx, 0, dz);
-    // moveVector = this.localToWorld(moveVector);
-    // this.v += a * delta;
+  update(delta, moving) {
+    if (moving) {
+      this.v < this.vmax ? this.v += a* delta : this.v = this.v;
+    } else {
+      this.v > 0 ? this.v -= a* delta : this.v = 0;
+    }
 
-    // this.move(dx, dz);
-    this.mesh.rotateX(-Math.PI / 4 * delta);
+    let dir = new THREE.Vector3().subVectors(board.position, this.position);
+    dir.setY(0);
+    dir.normalize();
+    let dx = -dir.z * this.v * delta;
+    let dz = dir.x * this.v * delta;
+
+    this.move(dx, dz, this.worldToLocal(dir));
+  }
+
+  move(dx, dz, dir) {
+    this.matrix.identity();
+    var m_trans = new THREE.Matrix4();
+    var m_rot = new THREE.Matrix4();
+    var rad = Math.sqrt(dz ** 2 + dx ** 2) / this.r;
+    m_trans.makeTranslation(dx, 0, dz);
+    m_rot.makeRotationAxis(dir.normalize(), rad);
+    this.applyMatrix(m_trans);
+    this.matrix.multiply(m_rot);
+    this.rotation.setFromRotationMatrix(this.matrix);
   }
 
   toggleWireframe() {

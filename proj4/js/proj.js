@@ -1,20 +1,25 @@
 /*global THREE*/
 
 var cameras = [], scene, renderer, camFactor = 12;
-var camera = 1;
-var newcam = 1;
+var camera = 1, toggleCam = false;
 var r = 32;
 var time = new Date();
 
 var currMat = 0;
 
-var dirLight, toggleDir;
-var spotlight, toggleSpot;
+var dirLight, toggleDir = false;
+var spotlight, toggleSpot = false;
 
 var toggleMat = false, toggleWire = false;
 
-var ball;
+var ball, board;
 var objs = [];
+
+const a = 40;
+var moving = false;
+
+var toggleReload = false;
+
 
 var l = 640;
 
@@ -47,21 +52,52 @@ function createCamera() {
   cameraP2.lookAt(scene.position);
 }
 
+function reload() {
+  for (let i = 0; i < objs.length; i++) {
+    scene.remove(objs[i]);
+  }
+  objs = [];
+
+  for (let i = 0; i < cameras.length; i++) {
+    scene.remove(cameras[i]);
+  }
+  cameras = []
+
+  scene.remove(dirLight);
+  scene.remove(spotlight);
+
+  createObjs();
+  createLights();
+  createCamera();
+
+  camera = 1;
+  toggleReload = false;
+  toggleCam = false;
+  toggleDir = false;
+  toggleMat = false;
+  toggleSpot = false;
+  toggleWire = false;
+}
+
 function createScene() {
   'use strict';
 
   scene = new THREE.Scene();
-  let board = new ChessBoard(0, 0, 0, l);
+  createObjs();
+}
+
+function createObjs() {
+  board = new ChessBoard(0, 0, 0, l);
   objs.push(board);
   scene.add(board);
 
-  ball = new Ball(-5 * r, 0, 5 * r, r)
+  ball = new Ball(-l / 2 + 3 * r, 0, 0, r, 100)
   objs.push(ball);
   scene.add(ball);
 }
 
 function createLights() {
-  dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight = new THREE.DirectionalLight(0xffffff, 2);
   dirLight.position.set(-250, 300, 200);
 
   dirLight.shadow.camera.near = 2;
@@ -129,13 +165,19 @@ function onResize() {
 function onKeyDown(e) {
   switch (e.keyCode) {
     case 53:  // 5
-      newcam = 1;
+      camera = 1;
+      toggleCam = true;
       break;
     case 54:  // 6
-      newcam = 0;
+      camera = 0;
+      toggleCam = true;
       break;
     case 55:  // 7
-      newcam = 2
+      camera = 2
+      toggleCam = true;
+      break;
+    case 66:  // B
+      moving = !moving;
       break;
     case 68:  // D
       toggleDir = true;
@@ -146,6 +188,9 @@ function onKeyDown(e) {
     case 76:  // L
       currMat = (currMat + 1) % 2;
       toggleMat = true;
+      break;
+    case 82:  // R
+      toggleReload = true;
       break;
   }
 }
@@ -160,8 +205,13 @@ function animate() {
   var elapsed = (newTime - time) / 1000;
   time = newTime;
 
-  if (newcam != camera) {
+  if (toggleReload) {
+    reload();
+  }
+
+  if (toggleCam) {
     camera = newcam;
+    toggleCam = false;
   }
 
   if (toggleDir) {
@@ -183,7 +233,7 @@ function animate() {
     toggleMat = false;
   }
 
-  ball.update(elapsed);
+  ball.update(elapsed, moving);
 
   render();
 
