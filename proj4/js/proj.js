@@ -16,9 +16,9 @@ function createCamera() {
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
       window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 2000);
 
-  cameraO.position.x = 0;
-  cameraO.position.y = 800;
-  cameraO.position.z = 0;
+  cameraO.position.x = 320;
+  cameraO.position.y = 0;
+  cameraO.position.z = 320;
   cameras.push(cameraO);
 
   var cameraP = new THREE.PerspectiveCamera(
@@ -31,9 +31,9 @@ function createCamera() {
 
   var cameraP2 = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 2000);
-  cameraP2.position.x = 300;
-  cameraP2.position.y = 400;
-  cameraP2.position.z = 500;
+  cameraP2.position.x = 320;
+  cameraP2.position.y = 40;
+  cameraP2.position.z = 320;
   cameras.push(cameraP2);
   cameraP2.lookAt(scene.position);
 }
@@ -44,10 +44,11 @@ function createScene() {
   scene = new THREE.Scene();
 
   scene.add(new ChessBoard(0, 0, 0, 640));
+  scene.add(new Dice(0, 10, 0, 40));
 }
 
 function createLights() {
-  dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight = new THREE.DirectionalLight(0xffffff, 2);
   dirLight.position.set(-250, 300, 200);
 
   dirLight.shadow.camera.near = 2;
