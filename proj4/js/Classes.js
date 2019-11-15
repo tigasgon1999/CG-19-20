@@ -6,6 +6,8 @@ class Object3d extends THREE.Object3D {
     this.position.x = x;
     this.position.y = y;
     this.position.z = z;
+    this.initPos = this.position.clone();
+    this.initRot = this.rotation.clone();
 
     this.texLoader = new THREE.TextureLoader();
 
@@ -14,6 +16,11 @@ class Object3d extends THREE.Object3D {
           {side: THREE.DoubleSide, wireframe: false}),
       new THREE.MeshBasicMaterial({side: THREE.DoubleSide, wireframe: false})
     ];
+  }
+
+  reload(){
+    this.position.copy(this.initPos);
+    this.rotation.copy(this.initRot);
   }
 }
 
@@ -36,18 +43,25 @@ class Border extends Object3d {
     this.addBorder();
   }
 
+  reload(){
+    super.reload();
+    this.toggleMaterial(0);
+    this.toggleWireframe(true);
+  }
+
   addBorder() {
     let geo = new THREE.CubeGeometry(this.l, this.h, this.l);
     let mat = this.mats[0].clone();
     this.mesh = new THREE.Mesh(geo, mat);
+    this.mesh.receiveShadow = true;
     this.add(this.mesh);
   }
 
-  toggleWireframe() {
+  toggleWireframe(w) {
     for (let i = 0; i < this.mats.length; i++) {
-      this.mats[i].wireframe = !this.mats[i].wireframe;
+      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
     }
-    this.mesh.material.wireframe = !this.mesh.material.wireframe;
+    this.mesh.material.wireframe = w == undefined? !this.mesh.material.wireframe : w;
   }
 
   toggleMaterial(n) {
@@ -60,7 +74,6 @@ class ChessBoard extends Object3d {
     super(x, y, z);
 
     this.l = l;
-    this.square_l = l / 8;
     this.h = h;
 
     for (let i = 0; i < this.mats.length; i++) {
@@ -71,29 +84,17 @@ class ChessBoard extends Object3d {
 
       this.mats[i].map = this.texLoader.load('textures/chess.png');
     }
-    // this.borderColor = 0x5d432c;
-    this.squares = [];
-
-    // this.add(new THREE.AxesHelper(l * 2))
-
-
 
     this.border = new Border(x, y, z, l * 1.2, h / 2);
     this.add(this.border);
-    // for (let i = 0; i < 8; i++) {
-    //   this.addColumn(i);
-    // }
     this.addBoard();
   }
 
-  addBorder() {
-    let geo = new THREE.CubeGeometry(this.l * 1.2, this.h / 2, this.l * 1.2);
-    let mat = this.mats[0].clone();
-    mat.color.set(this.borderColor);
-    let mesh = new THREE.Mesh(geo, mat);
-    this.border = mesh;
-    mesh.position.set(0, this.h / 4, 0);
-    this.add(mesh);
+  reload(){
+    super.reload();
+    this.border.reload();
+    this.toggleMaterial(0);
+    this.toggleWireframe(false);
   }
 
   addBoard() {
@@ -102,47 +103,21 @@ class ChessBoard extends Object3d {
     let mesh = new THREE.Mesh(geo, mat);
     this.board = mesh;
     mesh.position.set(0, this.h / 2, 0);
+    mesh.receiveShadow = true;
     this.add(mesh);
   }
 
-  addColumn(i) {
-    for (let j = 0; j < 8; j++) {
-      this.addSquare(i, j);
+  toggleWireframe(w) {
+    for(let i=0; i< this.mats.length; i++){
+      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
     }
-  }
-
-
-  addSquare(i, j) {
-    let x = this.l / 2 - this.square_l * (i + 0.5)
-    let z = this.l / 2 - this.square_l * (j + 0.5);
-
-    let geo = new THREE.CubeGeometry(this.square_l, this.h, this.square_l);
-    let mat = this.mats[0].clone();
-    (i + j) % 2 == 0 ? mat.color.set(0x000000) : mat.color.set(0xffffff);
-    let mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(x, this.h / 2, z);
-    this.add(mesh);
-    this.squares.push(mesh);
-  }
-
-  toggleWireframe() {
-    this.border.toggleWireframe();
-    this.board.material.wireframe = !this.board.material.wireframe;
-    // for (let i = 0; i < 64; i++) {
-    //   this.squares[i].material.wireframe =
-    //   !this.squares[i].material.wireframe;
-    // }
+    this.border.toggleWireframe(w);
+    this.board.material.wireframe = w == undefined? !this.board.material.wireframe : w;
   }
 
   toggleMaterial(n) {
     this.border.toggleMaterial(n);
     this.board.material = this.mats[n].clone();
-    this.board.material.map = this.chessTex;
-    // for (let i = 0; i < this.squares.length; i++) {
-    //   let c = this.squares[i].material.color;
-    //   this.squares[i].material = this.mats[n].clone();
-    //   this.squares[i].material.color.set(c);
-    // }
   }
 }
 
@@ -160,7 +135,6 @@ class Ball extends Object3d {
     this.tex.wrapT = THREE.RepeatWrapping;
     this.tex.repeat.set(1, 1);
 
-    // TODO: specular
     for (let i = 0; i < this.mats.length; i++) {
       this.mats[i].map = this.tex;
       this.mats[i].bumpMap = this.tex;
@@ -171,10 +145,14 @@ class Ball extends Object3d {
 
 
     this.addBall();
-    this.axis = new THREE.AxesHelper(this.r * 2);
-    this.axis.position.set(0, 0, 0);
-    this.axis.visible = false;
-    this.add(this.axis);
+
+  }
+
+  reload(){
+    super.reload();
+    this.toggleMaterial(0);
+    this.toggleWireframe(false);
+    this.v = 0;
   }
 
   addBall() {
@@ -183,6 +161,7 @@ class Ball extends Object3d {
     var geometry = new THREE.SphereGeometry(this.r, 50, 50);
     geometry.center(this.position);
     this.mesh = new THREE.Mesh(geometry, this.mats[0].clone());
+    this.mesh.castShadow = true;
 
     this.add(this.mesh);
   }
@@ -215,8 +194,11 @@ class Ball extends Object3d {
     this.rotation.setFromRotationMatrix(this.matrix);
   }
 
-  toggleWireframe() {
-    this.mesh.material.wireframe = !this.mesh.material.wireframe;
+  toggleWireframe(w) {
+    for(let i=0; i< this.mats.length; i++){
+      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
+    }
+    this.mesh.material.wireframe = w==undefined? !this.mesh.material.wireframe : w;
   }
 
   toggleMaterial(n) {
@@ -231,6 +213,12 @@ class Dice extends Object3d {
     this.rotv = 0.7;
 
     this.addCube()
+  }
+
+  reload(){
+    super.reload();
+    this.toggleMaterial(0);
+    this.toggleWireframe(false);
   }
 
   addCube() {
@@ -250,17 +238,17 @@ class Dice extends Object3d {
     this.mesh.rotateX(Math.PI / 4);
     this.mesh.rotateZ(Math.PI / 4);
 
-    this.add(this.mesh);
+    this.mesh.castShadow = true;
 
-    // this.position.y += ((Math.sqrt(3) - 1) * this.dice_l / 2);
+    this.add(this.mesh);
   }
 
-  toggleWireframe() {
+  toggleWireframe(w) {
     for (let i = 0; i < this.mats.length; i++) {
-      this.mats[i].wireframe = !this.mats[i].wireframe;
+      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
     }
     for (let i = 0; i < this.mesh.material.length; i++) {
-      this.mesh.material[i].wireframe = !this.mesh.material[i].wireframe;
+      this.mesh.material[i].wireframe = w == undefined? !this.mesh.material[i].wireframe : w;
     }
   }
 

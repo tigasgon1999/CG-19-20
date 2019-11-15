@@ -1,20 +1,20 @@
 /*global THREE*/
 
 var cameras = [], scene, renderer, camFactor = 12;
-var camera = 1, toggleCam = false, newcam = 1;
+var camera = 1, togglePause = false, onPause = false;
 var time = new Date();
 
 var currMat = 0;
 
 var dirLight, toggleDir = false;
-var spotlight, toggleSpot = false;
+var pointlight, toggleSpot = false;
 
 var toggleMat = false, toggleWire = false;
 
 var ball, board, dice;
 var objs = [];
 
-const a = 40;
+const a = 60;
 var moving = false;
 
 var toggleReload = false;
@@ -23,63 +23,50 @@ var toggleReload = false;
 const l = 640;
 const r = 32;
 const h = 10;
-const vmax = 100;
+const vmax = 200;
 
 
 function createCamera() {
   'use strict';
 
-  var cameraO = new THREE.OrthographicCamera(
+  var pauseCam = new THREE.OrthographicCamera(
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
       window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 5000);
 
-  cameraO.position.x = 0;
-  cameraO.position.y = 0;
-  cameraO.position.z = 2000;
-  cameras.push(cameraO);
+  pauseCam.position.x = 0;
+  pauseCam.position.y = 0;
+  pauseCam.position.z = 2000;
+  cameras.push(pauseCam);
 
-  var cameraP = new THREE.PerspectiveCamera(
+  var camera = new THREE.PerspectiveCamera(
       50, window.innerWidth / window.innerHeight, 1, 2000);
-  cameraP.position.x = 450;
-  cameraP.position.y = 550;
-  cameraP.position.z = 450;
-  cameras.push(cameraP);
-  cameraP.lookAt(scene.position);
-
-  var cameraP2 = new THREE.PerspectiveCamera(
-      50, window.innerWidth / window.innerHeight, 1, 2000);
-  cameraP2.position.x = 320;
-  cameraP2.position.y = 40;
-  cameraP2.position.z = 320;
-  cameras.push(cameraP2);
-  cameraP2.lookAt(scene.position);
+  camera.position.x = 650;
+  camera.position.y = 850;
+  camera.position.z = 650;
+  cameras.push(camera);
+  camera.lookAt(scene.position);
 }
 
 function reload() {
-  for (let i = 0; i < objs.length; i++) {
-    scene.remove(objs[i]);
+
+  for(let i=0; i<objs.length; i++){
+    objs[i].reload();
   }
-  objs = [];
-
-  for (let i = 0; i < cameras.length; i++) {
-    scene.remove(cameras[i]);
-  }
-  cameras = []
-
-  scene.remove(dirLight);
-  scene.remove(spotlight);
-
-  createObjs();
-  createLights();
-  createCamera();
 
   camera = 1;
+  currMat = 0;
+
+  dirLight.visible = true;
+  pointlight.visible = true;
+
   toggleReload = false;
-  toggleCam = false;
   toggleDir = false;
   toggleMat = false;
   toggleSpot = false;
   toggleWire = false;
+  togglePause = false;
+  moving = false;
+  onPause = false;
 }
 
 function createScene() {
@@ -108,9 +95,9 @@ function createLights() {
   dirLight.position.set(0, 300, l);
 
   dirLight.shadow.camera.near = 2;
-  dirLight.shadow.camera.far = 1000;
-  dirLight.shadow.camera.left = -200;
-  dirLight.shadow.camera.right = 200;
+  dirLight.shadow.camera.far = 2*l;
+  dirLight.shadow.camera.left = -l/2;
+  dirLight.shadow.camera.right = l/2;
   dirLight.shadow.camera.top = 200;
   dirLight.shadow.camera.bottom = -200;
 
@@ -119,26 +106,23 @@ function createLights() {
   scene.add(dirLight);
   toggleDir = false;
 
-  spotlight = new THREE.SpotLight(0xffffff, 5);
-  spotlight.position.set(l / 2, 100, -l / 2);
+  pointlight = new THREE.PointLight(0xffffff, 3);
+  pointlight.position.set(l / 4, 2*h, -l / 4);
 
-  spotlight.angle = Math.PI / 2;
-  spotlight.castShadow = true;
+  pointlight.angle = Math.PI / 2;
+  pointlight.castShadow = true;
 
-  spotlight.target = objs[0];
+  pointlight.shadow.mapSize.width = 1024;
+  pointlight.shadow.mapSize.height = 1024;
 
-  spotlight.shadow.mapSize.width = 512;
-  spotlight.shadow.mapSize.height = 512;
+  pointlight.shadow.camera.near = 0.5;
+  pointlight.shadow.camera.far = 2000;
 
-  spotlight.shadow.camera.near = 0.5;
-  spotlight.shadow.camera.far = 400;
-  spotlight.shadow.camera.fov = 30;
+  pointlight.decay = 2;
+  pointlight.penumbra = 0.2;
+  pointlight.distance = 2000;
 
-  spotlight.decay = 2;
-  spotlight.penumbra = 0.2;
-  spotlight.distance = 800;
-
-  scene.add(spotlight);
+  scene.add(pointlight);
   toggleSpot = false;
 }
 
@@ -168,21 +152,21 @@ function onResize() {
     }
   }
 }
+  
+
+function pause(){
+  togglePause = false;
+  if(onPause){
+    onPause = false;
+    camera = 1;
+  }else{
+    onPause = true;
+    camera = 0;
+  }
+}
 
 function onKeyDown(e) {
   switch (e.keyCode) {
-    case 53:  // 5
-      newcam = 1;
-      toggleCam = true;
-      break;
-    case 54:  // 6
-      newcam = 0;
-      toggleCam = true;
-      break;
-    case 55:  // 7
-      newcam = 2
-      toggleCam = true;
-      break;
     case 66:  // B
       moving = !moving;
       break;
@@ -202,12 +186,12 @@ function onKeyDown(e) {
     case 82:  // R
       toggleReload = true;
       break;
+    case 83: // S
+      togglePause = true;
+      break;
   }
 }
 
-function onKeyUp(e) {
-  'use strict';
-}
 
 function animate() {
   'use strict';
@@ -219,9 +203,8 @@ function animate() {
     reload();
   }
 
-  if (toggleCam) {
-    camera = newcam;
-    toggleCam = false;
+  if (togglePause) {
+    pause();
   }
 
   if (toggleDir) {
@@ -230,7 +213,7 @@ function animate() {
   }
 
   if (toggleSpot) {
-    spotlight.visible = !spotlight.visible;
+    pointlight.visible = !pointlight.visible;
     toggleSpot = false;
   }
 
@@ -248,8 +231,8 @@ function animate() {
     toggleMat = false;
   }
 
-  ball.update(elapsed, moving);
-  dice.update(elapsed);
+  ball.update(onPause? 0 : elapsed, moving);
+  dice.update(onPause? 0 : elapsed);
 
   render();
 
@@ -273,5 +256,4 @@ function init() {
 
   window.addEventListener('resize', onResize);
   window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup', onKeyUp);
 }
