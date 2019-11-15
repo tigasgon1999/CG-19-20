@@ -98,7 +98,7 @@ function createObjs() {
   objs.push(ball);
   scene.add(ball);
 
-  dice = new Dice(0, h, 0, 40);
+  dice = new Dice(100, h, 100, 40);
   objs.push(dice);
   scene.add(dice);
 }
