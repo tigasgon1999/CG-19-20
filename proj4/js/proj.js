@@ -11,10 +11,10 @@ var pointlight, toggleSpot = false;
 
 var toggleMat = false, toggleWire = false;
 
-var ball, board, dice;
+var ball, board, dice, pauseScreen;
 var objs = [];
 
-const a = 60;
+const a = 120;
 var moving = false;
 
 var toggleReload = false;
@@ -23,7 +23,7 @@ var toggleReload = false;
 const l = 640;
 const r = 32;
 const h = 10;
-const vmax = 200;
+const vmax = 1500;
 
 
 function createCamera() {
@@ -33,9 +33,10 @@ function createCamera() {
       window.innerWidth / -camFactor, window.innerWidth / camFactor,
       window.innerHeight / camFactor, window.innerHeight / -camFactor, 1, 5000);
 
-  pauseCam.position.x = 0;
-  pauseCam.position.y = 0;
-  pauseCam.position.z = 2000;
+  pauseCam.position.x = pauseScreen.position.x;
+  pauseCam.position.y = pauseScreen.position.y;
+  pauseCam.position.z = pauseScreen.position.z + 100;
+
   cameras.push(pauseCam);
 
   var camera = new THREE.PerspectiveCamera(
@@ -48,8 +49,7 @@ function createCamera() {
 }
 
 function reload() {
-
-  for(let i=0; i<objs.length; i++){
+  for (let i = 0; i < objs.length; i++) {
     objs[i].reload();
   }
 
@@ -85,19 +85,23 @@ function createObjs() {
   objs.push(ball);
   scene.add(ball);
 
-  dice = new Dice(100, h, 100, 40);
+  dice = new Dice(0, h, 0, 40);
   objs.push(dice);
   scene.add(dice);
+
+  pauseScreen = new Pause(0, 500, 2000, 200, 80);
+  scene.add(pauseScreen);
+  pauseScreen.visible = false;
 }
 
 function createLights() {
-  dirLight = new THREE.DirectionalLight(0xffffff, 2);
+  dirLight = new THREE.DirectionalLight(0xffffff, 1);
   dirLight.position.set(0, 300, l);
 
   dirLight.shadow.camera.near = 2;
-  dirLight.shadow.camera.far = 2*l;
-  dirLight.shadow.camera.left = -l/2;
-  dirLight.shadow.camera.right = l/2;
+  dirLight.shadow.camera.far = 2 * l;
+  dirLight.shadow.camera.left = -l / 2;
+  dirLight.shadow.camera.right = l / 2;
   dirLight.shadow.camera.top = 200;
   dirLight.shadow.camera.bottom = -200;
 
@@ -106,8 +110,8 @@ function createLights() {
   scene.add(dirLight);
   toggleDir = false;
 
-  pointlight = new THREE.PointLight(0xffffff, 3);
-  pointlight.position.set(l / 4, 2*h, -l / 4);
+  pointlight = new THREE.PointLight(0xffffff, 2);
+  pointlight.position.set(l / 8, 2 * h, -l / 8);
 
   pointlight.angle = Math.PI / 2;
   pointlight.castShadow = true;
@@ -152,16 +156,18 @@ function onResize() {
     }
   }
 }
-  
 
-function pause(){
+
+function pause() {
   togglePause = false;
-  if(onPause){
+  if (onPause) {
     onPause = false;
     camera = 1;
-  }else{
+    pauseScreen.visible = false;
+  } else {
     onPause = true;
     camera = 0;
+    pauseScreen.visible = true;
   }
 }
 
@@ -186,7 +192,7 @@ function onKeyDown(e) {
     case 82:  // R
       toggleReload = true;
       break;
-    case 83: // S
+    case 83:  // S
       togglePause = true;
       break;
   }
@@ -231,8 +237,8 @@ function animate() {
     toggleMat = false;
   }
 
-  ball.update(onPause? 0 : elapsed, moving);
-  dice.update(onPause? 0 : elapsed);
+  ball.update(onPause ? 0 : elapsed, moving);
+  dice.update(onPause ? 0 : elapsed);
 
   render();
 

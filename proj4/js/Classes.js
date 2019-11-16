@@ -8,17 +8,19 @@ class Object3d extends THREE.Object3D {
     this.position.z = z;
     this.initPos = this.position.clone();
     this.initRot = this.rotation.clone();
+    this.wireframe = false;
+    this.prevMat = 0;
+    this.currMat = 0;
 
     this.texLoader = new THREE.TextureLoader();
 
     this.mats = [
-      new THREE.MeshStandardMaterial(
-          {side: THREE.DoubleSide, wireframe: false}),
+      new THREE.MeshPhongMaterial({side: THREE.DoubleSide, wireframe: false}),
       new THREE.MeshBasicMaterial({side: THREE.DoubleSide, wireframe: false})
     ];
   }
 
-  reload(){
+  reload() {
     this.position.copy(this.initPos);
     this.rotation.copy(this.initRot);
   }
@@ -28,7 +30,7 @@ class Border extends Object3d {
   constructor(x, y, z, l, h) {
     super(x, y + h / 2, z);
 
-    this.color = 0x5d432c;
+    this.color = new THREE.Color(0x5d432c);
     this.l = l;
     this.h = h;
 
@@ -43,7 +45,7 @@ class Border extends Object3d {
     this.addBorder();
   }
 
-  reload(){
+  reload() {
     super.reload();
     this.toggleMaterial(0);
     this.toggleWireframe(true);
@@ -51,21 +53,42 @@ class Border extends Object3d {
 
   addBorder() {
     let geo = new THREE.CubeGeometry(this.l, this.h, this.l);
-    let mat = this.mats[0].clone();
+    let mat = this.mats[0];
     this.mesh = new THREE.Mesh(geo, mat);
     this.mesh.receiveShadow = true;
     this.add(this.mesh);
   }
 
   toggleWireframe(w) {
-    for (let i = 0; i < this.mats.length; i++) {
-      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
+    let wireframe = false;
+    if (w == undefined) {
+      wireframe = !this.mesh.material.wireframe;
+    } else {
+      wireframe = w;
     }
-    this.mesh.material.wireframe = w == undefined? !this.mesh.material.wireframe : w;
+
+    for (let i = 0; i < this.mats.length; i++) {
+      this.mats[i].wireframe = wireframe;
+    }
+
+    this.wireframe = false;
+
+    if (wireframe) {
+      this.toggleMaterial(1);
+    } else {
+      this.toggleMaterial(this.prevMat);
+    }
+
+    this.wireframe = wireframe;
   }
 
   toggleMaterial(n) {
-    this.mesh.material = this.mats[n].clone();
+    if (this.wireframe) {
+      return;
+    }
+    this.prevMat = this.currMat;
+    this.currMat = n;
+    this.mesh.material = this.mats[n];
   }
 }
 
@@ -90,7 +113,7 @@ class ChessBoard extends Object3d {
     this.addBoard();
   }
 
-  reload(){
+  reload() {
     super.reload();
     this.border.reload();
     this.toggleMaterial(0);
@@ -99,25 +122,45 @@ class ChessBoard extends Object3d {
 
   addBoard() {
     let geo = new THREE.CubeGeometry(this.l, this.h, this.l);
-    let mat = this.mats[0].clone();
-    let mesh = new THREE.Mesh(geo, mat);
-    this.board = mesh;
+    let mesh = new THREE.Mesh(geo, this.mats[0]);
+    this.mesh = mesh;
     mesh.position.set(0, this.h / 2, 0);
     mesh.receiveShadow = true;
     this.add(mesh);
   }
 
   toggleWireframe(w) {
-    for(let i=0; i< this.mats.length; i++){
-      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
+    this.border.toggleWireframe();
+    let wireframe = false;
+    if (w == undefined) {
+      wireframe = !this.mesh.material.wireframe;
+    } else {
+      wireframe = w;
     }
-    this.border.toggleWireframe(w);
-    this.board.material.wireframe = w == undefined? !this.board.material.wireframe : w;
+
+    for (let i = 0; i < this.mats.length; i++) {
+      this.mats[i].wireframe = wireframe;
+    }
+
+    this.wireframe = false;
+
+    if (wireframe) {
+      this.toggleMaterial(1);
+    } else {
+      this.toggleMaterial(this.prevMat);
+    }
+
+    this.wireframe = wireframe;
   }
 
   toggleMaterial(n) {
+    if (this.wireframe) {
+      return;
+    }
+    this.prevMat = this.currMat;
+    this.currMat = n;
     this.border.toggleMaterial(n);
-    this.board.material = this.mats[n].clone();
+    this.mesh.material = this.mats[n];
   }
 }
 
@@ -138,17 +181,14 @@ class Ball extends Object3d {
     for (let i = 0; i < this.mats.length; i++) {
       this.mats[i].map = this.tex;
       this.mats[i].bumpMap = this.tex;
-      this.mats[i].shininess = 50;
-      this.mats[i].specular = 0xffffff;
+      this.mats[i].shininess = 10;
+      this.mats[i].specular = new THREE.Color(0xa9a9a9);
     }
 
-
-
     this.addBall();
-
   }
 
-  reload(){
+  reload() {
     super.reload();
     this.toggleMaterial(0);
     this.toggleWireframe(false);
@@ -160,7 +200,7 @@ class Ball extends Object3d {
 
     var geometry = new THREE.SphereGeometry(this.r, 50, 50);
     geometry.center(this.position);
-    this.mesh = new THREE.Mesh(geometry, this.mats[0].clone());
+    this.mesh = new THREE.Mesh(geometry, this.mats[0]);
     this.mesh.castShadow = true;
 
     this.add(this.mesh);
@@ -173,11 +213,28 @@ class Ball extends Object3d {
       this.v > 0 ? this.v -= a* delta : this.v = 0;
     }
 
+
     let dir = new THREE.Vector3().subVectors(board.position, this.position);
     dir.setY(0);
+
+    var r = dir.length();
     dir.normalize();
     let dx = -dir.z * this.v * delta;
     let dz = dir.x * this.v * delta;
+
+    this.move(dx, dz, this.worldToLocal(dir));
+
+    let newD = new THREE.Vector3().subVectors(board.position, this.position);
+    newD.setY(0);
+
+    var newR = newD.length();
+
+    let diff = newR - r;
+
+    newD.normalize();
+
+    dx = newD.x * diff;
+    dz = newD.z * diff;
 
     this.move(dx, dz, this.worldToLocal(dir));
   }
@@ -195,14 +252,35 @@ class Ball extends Object3d {
   }
 
   toggleWireframe(w) {
-    for(let i=0; i< this.mats.length; i++){
-      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
+    let wireframe = false;
+    if (w == undefined) {
+      wireframe = !this.mesh.material.wireframe;
+    } else {
+      wireframe = w;
     }
-    this.mesh.material.wireframe = w==undefined? !this.mesh.material.wireframe : w;
+
+    for (let i = 0; i < this.mats.length; i++) {
+      this.mats[i].wireframe = wireframe;
+    }
+
+    this.wireframe = false;
+
+    if (wireframe) {
+      this.toggleMaterial(1);
+    } else {
+      this.toggleMaterial(this.prevMat);
+    }
+
+    this.wireframe = wireframe;
   }
 
   toggleMaterial(n) {
-    this.mesh.material = this.mats[n].clone();
+    if (this.wireframe) {
+      return;
+    }
+    this.prevMat = this.currMat;
+    this.currMat = n;
+    this.mesh.material = this.mats[n];
   }
 }
 
@@ -212,10 +290,25 @@ class Dice extends Object3d {
     this.dice_l = l;
     this.rotv = 0.7;
 
+    let newMats = [];
+    for (let i = 0; i < this.mats.length; i++) {
+      let mat = [];
+      for (let j = 1; j < 7; j++) {
+        let tex = this.texLoader.load('textures/dice' + j + '.jpg');
+        let m = this.mats[i].clone();
+        m.bumpMap = tex;
+        m.map = tex;
+        mat.push(m);
+      }
+      newMats.push(mat);
+    }
+
+    this.mats = Array.from(newMats);
+
     this.addCube()
   }
 
-  reload(){
+  reload() {
     super.reload();
     this.toggleMaterial(0);
     this.toggleWireframe(false);
@@ -224,16 +317,7 @@ class Dice extends Object3d {
   addCube() {
     let geo = new THREE.CubeGeometry(this.dice_l, this.dice_l, this.dice_l);
 
-    let mat = [];
-    for (let i = 1; i < 7; i++) {
-      let tex = this.texLoader.load('textures/dice' + i + '.jpg');
-      let m = this.mats[0].clone();
-      m.bumpMap = tex;
-      m.map = tex;
-      mat.push(m);
-    }
-
-    this.mesh = new THREE.Mesh(geo, mat);
+    this.mesh = new THREE.Mesh(geo, this.mats[0]);
     this.mesh.position.set(0, ((Math.sqrt(3) - 1) * this.dice_l / 2), 0);
     this.mesh.rotateX(Math.PI / 4);
     this.mesh.rotateZ(Math.PI / 4);
@@ -244,26 +328,62 @@ class Dice extends Object3d {
   }
 
   toggleWireframe(w) {
+    let wireframe = false;
+    if (w == undefined) {
+      wireframe = !this.mesh.material[0].wireframe;
+    } else {
+      wireframe = w;
+    }
+
     for (let i = 0; i < this.mats.length; i++) {
-      this.mats[i].wireframe = w == undefined? !this.mats[i].wireframe : w;
+      for (let j = 0; j < this.mats[i].length; j++)
+        this.mats[i][j].wireframe = wireframe;
     }
-    for (let i = 0; i < this.mesh.material.length; i++) {
-      this.mesh.material[i].wireframe = w == undefined? !this.mesh.material[i].wireframe : w;
+
+    this.wireframe = false;
+
+    if (wireframe) {
+      this.toggleMaterial(1);
+    } else {
+      this.toggleMaterial(this.prevMat);
     }
+
+
+    this.wireframe = wireframe
   }
 
   toggleMaterial(n) {
-    for (let i = 1; i < 7; i++) {
-      let tex = this.texLoader.load('textures/dice' + i + '.jpg');
-      let m = this.mats[n].clone();
-      m.bumpMap = tex;
-      m.map = tex;
-      this.mesh.material[i - 1] = m;
+    if (this.wireframe) {
+      return;
     }
+    this.prevMat = this.currMat;
+    this.currMat = n;
+    this.mesh.material = this.mats[n];
   }
 
   update(delta) {
     let rot = delta * this.rotv;
     this.rotation.y += rot;
+  }
+}
+
+class Pause extends Object3d {
+  constructor(x, y, z, l, h) {
+    super(x, y, z);
+
+    this.l = l;
+    this.h = h;
+
+    this.addBlock();
+  }
+
+  addBlock() {
+    let geo = new THREE.CubeGeometry(this.l, this.h, 20);
+    let mat = new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
+      map: this.texLoader.load('textures/pause.png')
+    });
+    this.mesh = new THREE.Mesh(geo, mat);
+    this.add(this.mesh);
   }
 }
