@@ -30,16 +30,15 @@ class Border extends Object3d {
   constructor(x, y, z, l, h) {
     super(x, y + h / 2, z);
 
-    this.color = new THREE.Color(0x5d432c);
     this.l = l;
     this.h = h;
 
     for (let i = 0; i < this.mats.length; i++) {
-      this.mats[i].bumpMap = this.texLoader.load('textures/wood.jpg');
-      this.mats[i].bumpMap.wrapS = THREE.RepeatWrapping;
-      this.mats[i].bumpMap.wrapT = THREE.RepeatWrapping;
-      this.mats[i].bumpMap.repeat.set(4, 4);
-      this.mats[i].color.set(this.color);
+      this.mats[i].bumpMap = this.texLoader.load('textures/wood1.jpg');
+      this.mats[i].bumpMap.wrapS = THREE.ClampToEdgeWrapping;
+      this.mats[i].bumpMap.wrapT = THREE.ClampToEdgeWrapping;
+
+      this.mats[i].map = this.mats[i].bumpMap;
     }
 
     this.addBorder();
@@ -47,8 +46,8 @@ class Border extends Object3d {
 
   reload() {
     super.reload();
+    this.toggleWireframe(false);
     this.toggleMaterial(0);
-    this.toggleWireframe(true);
   }
 
   addBorder() {
@@ -83,11 +82,11 @@ class Border extends Object3d {
   }
 
   toggleMaterial(n) {
+    this.prevMat = this.currMat;
+    this.currMat = n;
     if (this.wireframe) {
       return;
     }
-    this.prevMat = this.currMat;
-    this.currMat = n;
     this.mesh.material = this.mats[n];
   }
 }
@@ -100,12 +99,14 @@ class ChessBoard extends Object3d {
     this.h = h;
 
     for (let i = 0; i < this.mats.length; i++) {
-      this.mats[i].bumpMap = this.texLoader.load('textures/wood.jpg');
+      this.mats[i].bumpMap = this.texLoader.load('textures/wood1.jpg');
       this.mats[i].bumpMap.wrapS = THREE.RepeatWrapping;
       this.mats[i].bumpMap.wrapT = THREE.RepeatWrapping;
-      this.mats[i].bumpMap.repeat.set(4, 4);
+      this.mats[i].bumpMap.repeat.set(8, 8);
 
       this.mats[i].map = this.texLoader.load('textures/chess.png');
+      this.mats[i].bumpMap.wrapS = THREE.ClampToEdgeWrapping;
+      this.mats[i].bumpMap.wrapT = THREE.ClampToEdgeWrapping;
     }
 
     this.border = new Border(x, y, z, l * 1.2, h / 2);
@@ -116,8 +117,8 @@ class ChessBoard extends Object3d {
   reload() {
     super.reload();
     this.border.reload();
-    this.toggleMaterial(0);
     this.toggleWireframe(false);
+    this.toggleMaterial(0);
   }
 
   addBoard() {
@@ -130,8 +131,8 @@ class ChessBoard extends Object3d {
   }
 
   toggleWireframe(w) {
-    this.border.toggleWireframe();
-    let wireframe = false;
+    this.border.toggleWireframe(w);
+    var wireframe = false;
     if (w == undefined) {
       wireframe = !this.mesh.material.wireframe;
     } else {
@@ -154,11 +155,11 @@ class ChessBoard extends Object3d {
   }
 
   toggleMaterial(n) {
+    this.prevMat = this.currMat;
+    this.currMat = n;
     if (this.wireframe) {
       return;
     }
-    this.prevMat = this.currMat;
-    this.currMat = n;
     this.border.toggleMaterial(n);
     this.mesh.material = this.mats[n];
   }
@@ -190,8 +191,8 @@ class Ball extends Object3d {
 
   reload() {
     super.reload();
-    this.toggleMaterial(0);
     this.toggleWireframe(false);
+    this.toggleMaterial(0);
     this.v = 0;
   }
 
@@ -275,11 +276,11 @@ class Ball extends Object3d {
   }
 
   toggleMaterial(n) {
+    this.prevMat = this.currMat;
+    this.currMat = n;
     if (this.wireframe) {
       return;
     }
-    this.prevMat = this.currMat;
-    this.currMat = n;
     this.mesh.material = this.mats[n];
   }
 }
@@ -294,10 +295,14 @@ class Dice extends Object3d {
     for (let i = 0; i < this.mats.length; i++) {
       let mat = [];
       for (let j = 1; j < 7; j++) {
-        let tex = this.texLoader.load('textures/dice' + j + '.jpg');
         let m = this.mats[i].clone();
-        m.bumpMap = tex;
-        m.map = tex;
+        m.bumpMap = this.texLoader.load('textures/dice' + j + 'bump4.png');
+        m.bumpMap.wrapS = THREE.ClampToEdgeWrapping;
+        m.bumpMap.wrapT = THREE.ClampToEdgeWrapping;
+
+        m.map = this.texLoader.load('textures/dice' + j + '.jpg');
+        m.map.wrapS = THREE.ClampToEdgeWrapping;
+        m.map.wrapT = THREE.ClampToEdgeWrapping;
         mat.push(m);
       }
       newMats.push(mat);
@@ -310,8 +315,8 @@ class Dice extends Object3d {
 
   reload() {
     super.reload();
-    this.toggleMaterial(0);
     this.toggleWireframe(false);
+    this.toggleMaterial(0);
   }
 
   addCube() {
@@ -353,11 +358,11 @@ class Dice extends Object3d {
   }
 
   toggleMaterial(n) {
+    this.prevMat = this.currMat;
+    this.currMat = n;
     if (this.wireframe) {
       return;
     }
-    this.prevMat = this.currMat;
-    this.currMat = n;
     this.mesh.material = this.mats[n];
   }
 

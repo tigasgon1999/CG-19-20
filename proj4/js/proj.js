@@ -2,6 +2,7 @@
 
 var cameras = [], scene, renderer, camFactor = 12;
 var camera = 1, togglePause = false, onPause = false;
+var controls;
 var time = new Date();
 
 var currMat = 0;
@@ -46,6 +47,9 @@ function createCamera() {
   camera.position.z = 650;
   cameras.push(camera);
   camera.lookAt(scene.position);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.update();
 }
 
 function reload() {
@@ -110,7 +114,7 @@ function createLights() {
   scene.add(dirLight);
   toggleDir = false;
 
-  pointlight = new THREE.PointLight(0xffffff, 2);
+  pointlight = new THREE.PointLight(0xffffff, 2.3);
   pointlight.position.set(l / 8, 2 * h, -l / 8);
 
   pointlight.angle = Math.PI / 2;
@@ -190,7 +194,7 @@ function onKeyDown(e) {
       toggleSpot = true;
       break;
     case 82:  // R
-      toggleReload = true;
+      toggleReload = onPause;
       break;
     case 83:  // S
       togglePause = true;
@@ -243,6 +247,8 @@ function animate() {
   render();
 
   requestAnimationFrame(animate);
+
+  controls.update();
 }
 
 function init() {
