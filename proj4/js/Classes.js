@@ -182,7 +182,7 @@ class Ball extends Object3d {
     for (let i = 0; i < this.mats.length; i++) {
       this.mats[i].map = this.tex;
       this.mats[i].bumpMap = this.tex;
-      this.mats[i].shininess = 10;
+      this.mats[i].shininess = 100;
       this.mats[i].specular = new THREE.Color(0xa9a9a9);
     }
 
@@ -287,7 +287,7 @@ class Ball extends Object3d {
 
 class Dice extends Object3d {
   constructor(x, y, z, l) {
-    super(x, y + l / 2, z);
+    super(x, y, z);
     this.dice_l = l;
     this.rotv = 0.7;
 
@@ -303,6 +303,8 @@ class Dice extends Object3d {
         m.map = this.texLoader.load('textures/dice' + j + '.jpg');
         m.map.wrapS = THREE.ClampToEdgeWrapping;
         m.map.wrapT = THREE.ClampToEdgeWrapping;
+
+        m.shininess = 80;
         mat.push(m);
       }
       newMats.push(mat);
@@ -320,16 +322,17 @@ class Dice extends Object3d {
   }
 
   addCube() {
-    let geo = new THREE.CubeGeometry(this.dice_l, this.dice_l, this.dice_l);
+    let geo = new THREE.BoxGeometry(this.dice_l, this.dice_l, this.dice_l);
 
     this.mesh = new THREE.Mesh(geo, this.mats[0]);
-    this.mesh.position.set(0, ((Math.sqrt(3) - 1) * this.dice_l / 2), 0);
-    this.mesh.rotateX(Math.PI / 4);
-    this.mesh.rotateZ(Math.PI / 4);
 
     this.mesh.castShadow = true;
 
     this.add(this.mesh);
+
+    this.mesh.rotateZ(Math.atan(1 / Math.sqrt(2)));
+    this.mesh.rotateX(Math.PI / 4);
+    this.mesh.position.set(0, (Math.sqrt(3) * this.dice_l / 2), 0);
   }
 
   toggleWireframe(w) {

@@ -15,7 +15,7 @@ var toggleMat = false, toggleWire = false;
 var ball, board, dice, pauseScreen;
 var objs = [];
 
-const a = 120;
+const a = 80;
 var moving = false;
 
 var toggleReload = false;
@@ -24,7 +24,7 @@ var toggleReload = false;
 const l = 640;
 const r = 32;
 const h = 10;
-const vmax = 1500;
+const vmax = 280;
 
 
 function createCamera() {
