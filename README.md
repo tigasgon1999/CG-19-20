@@ -1,2 +1,2 @@
 # CG-19-20
-Labs and Projects
+Labs and Projects for the course of Computer Graphics.
